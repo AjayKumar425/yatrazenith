@@ -14,7 +14,7 @@ export default function Header() {
     const headerRef = useRef<HTMLElement>(null);
 
     useGSAP(() => {
-
+        
     }, { scope: headerRef, dependencies: [isActive] });
 
     return (

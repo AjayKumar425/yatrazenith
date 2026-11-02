@@ -20,7 +20,22 @@ export default function Button({ isActive, setIsActive }: ButtonProps) {
     }, { scope: buttonRef, dependencies: [isActive] });
     return (
         <div onClick={() => { setIsActive(!isActive)}} className={styles.button} ref={buttonRef}>
+            <div className={styles.slider}>
 
+            </div>
+        </div>
+    )
+}
+
+interface PerpectiveTextProps {
+    label: string;
+}
+
+function PersPectiveText({ label }: PerspectiveTextProps) {
+    return (
+        <div className={styles.perspectiveText}>
+            <p>{label}</p>
+            <p>{label}</p>
         </div>
     )
 }
