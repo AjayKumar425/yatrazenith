@@ -2,13 +2,12 @@
 
 import styles from "./style.module.scss";
 import Links from "./data";
+import Button from "./Button";
 
 export default function Header() {
     return (
         <header className={styles.header}>
-            <button type="button" className={styles.menu}>
-        
-            </button>
+            <Button />
         </header>
     )
 }
