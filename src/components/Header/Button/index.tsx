@@ -27,7 +27,7 @@ export default function Button({ isActive, setIsActive }: ButtonProps) {
     )
 }
 
-interface PerpectiveTextProps {
+interface PerspectiveTextProps {
     label: string;
 }
 

@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./style.module.scss";
-import Links from "./data";
+import { navLinks, socialLinks } from "./data";
 import Button from "./Button";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
