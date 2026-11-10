@@ -7,5 +7,5 @@ export default function Landing() {
         <section className={styles.landing}>
             
         </section>
-    )
+    );
 }
