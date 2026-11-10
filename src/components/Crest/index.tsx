@@ -23,3 +23,4 @@ export default function Crest({ className = "", size = 48 }: CrestProps) {
     </svg>
   );
 }
+

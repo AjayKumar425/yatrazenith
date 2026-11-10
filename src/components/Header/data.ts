@@ -1,16 +1,12 @@
 export interface NavLinkItem {
-    title: string;
-    href: string;
+  title: string;
+  href: string;
+  isActive?: boolean;
 }
 
 export const navLinks: NavLinkItem[] = [
-  { title: "Work", href: "/" },
-  { title: "About", href: "/" },
-  { title: "Contact", href: "/contact" },
-];
-
-export const socialLinks: NavLinkItem[] = [
-  { title: "Twitter", href: "https://x.com" },
-  { title: "GitHub", href: "https://github.com" },
-  { title: "LinkedIn", href: "https://linkedin.com" },
+  { title: "Home", href: "/", isActive: true },
+  { title: "Destinations", href: "#destinations" },
+  { title: "About", href: "#about" },
+  { title: "Journal", href: "#journal" },
 ];
