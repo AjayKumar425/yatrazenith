@@ -7,41 +7,43 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import styles from "./style.module.scss";
-import { navLinks } from "./data";
+import { navLinks, contactLinks, socialLinks } from "./data";
 
 gsap.registerPlugin(useGSAP, SplitText);
 
 export default function Header() {
   const headerRef = useRef<HTMLElement>(null);
-  const brandRef = useRef<HTMLAnchorElement>(null);
-  const navRef = useRef<HTMLUListElement>(null);
-  const actionsRef = useRef<HTMLDivElement>(null);
+  const topBarRef = useRef<HTMLDivElement>(null);
+  const overlayRef = useRef<HTMLDivElement>(null);
+  const navListRef = useRef<HTMLUListElement>(null);
+  const footerLeftRef = useRef<HTMLDivElement>(null);
+  const footerRightRef = useRef<HTMLDivElement>(null);
 
+  const [isOpen, setIsOpen] = useState(false);
   const [hasRevealed, setHasRevealed] = useState(false);
-  const splitsRef = useRef<SplitText[]>([]);
 
-  // Cleanup SplitText instances
-  const cleanupSplits = useCallback(() => {
-    splitsRef.current.forEach((split) => {
-      try {
-        split.revert();
-      } catch {
-        // Safe cleanup
-      }
+  const barSplitsRef = useRef<SplitText[]>([]);
+  const navSplitsRef = useRef<SplitText[]>([]);
+  const openTimelineRef = useRef<gsap.core.Timeline | null>(null);
+
+  // ---- Cleanup helpers ----
+  const cleanupSplits = useCallback((ref: React.RefObject<SplitText[]>) => {
+    ref.current.forEach((s) => {
+      try { s.revert(); } catch { /* safe */ }
     });
-    splitsRef.current = [];
+    ref.current = [];
   }, []);
 
-  // SplitText Mask Reveal for Header elements
+  // ---- Initial reveal (triggered by landing page "reveal-header" event) ----
   const revealHeader = useCallback(() => {
     if (hasRevealed || !headerRef.current) return;
     setHasRevealed(true);
 
-    cleanupSplits();
+    cleanupSplits(barSplitsRef);
 
-    // Split text targets: brand text, nav links, button text
+    // Split the top bar text elements
     const textTargets = headerRef.current.querySelectorAll<HTMLElement>(
-      `.${styles.brandYatra}, .${styles.brandZenith}, .${styles.navLink}, .${styles.planTripBtn} span:first-child`
+      `.${styles.brandTitle}, .${styles.brandSub}, .${styles.menuLabel}, .${styles.ctaPill}`
     );
 
     const parentSplits: SplitText[] = [];
@@ -60,151 +62,272 @@ export default function Header() {
       childSplits.push(child);
     });
 
-    splitsRef.current = [...parentSplits, ...childSplits];
-
+    barSplitsRef.current = [...parentSplits, ...childSplits];
     const innerLines = childSplits.flatMap((c) => c.lines);
 
-    // Initial state: lines pushed down below masks, icons hidden
+    // Set initial states
     gsap.set(headerRef.current, { opacity: 1 });
     gsap.set(innerLines, { yPercent: 120, opacity: 0 });
 
     const logoImg = headerRef.current.querySelector(`.${styles.logoImg}`);
-    const searchBtn = headerRef.current.querySelector(`.${styles.searchBtn}`);
-    const planTripBtn = headerRef.current.querySelector(`.${styles.planTripBtn}`);
-    const activeIndicator = headerRef.current.querySelector(
-      `.${styles.activeIndicator}`
-    );
+    const hamburgerIcon = headerRef.current.querySelector(`.${styles.hamburgerIcon}`);
+    const ctaPill = headerRef.current.querySelector(`.${styles.ctaPill}`);
 
-    gsap.set([logoImg, searchBtn, planTripBtn], { opacity: 0, y: -10 });
-    if (activeIndicator) {
-      gsap.set(activeIndicator, { scaleX: 0, transformOrigin: "left center" });
-    }
+    gsap.set([logoImg, hamburgerIcon, ctaPill].filter(Boolean), { opacity: 0, y: -8 });
 
-    // Header Reveal Timeline
-    const tl = gsap.timeline({
-      defaults: { ease: "expo.out" },
-    });
+    // Animate in
+    const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
-    // 1. Logo & Button containers fade in
     tl.to(
-      [logoImg, planTripBtn, searchBtn],
-      {
-        opacity: 1,
-        y: 0,
-        duration: 1.2,
-        stagger: 0.1,
-      },
+      [hamburgerIcon, logoImg, ctaPill].filter(Boolean),
+      { opacity: 1, y: 0, duration: 1.2, stagger: 0.08 },
       0
     );
 
-    // 2. SplitText masked lines slide up
     tl.to(
       innerLines,
-      {
-        yPercent: 0,
-        opacity: 1,
-        duration: 1.4,
-        stagger: 0.04,
-      },
-      0.15
+      { yPercent: 0, opacity: 1, duration: 1.4, stagger: 0.04 },
+      0.1
     );
-
-    // 3. Active indicator bar draws
-    if (activeIndicator) {
-      tl.to(
-        activeIndicator,
-        {
-          scaleX: 1,
-          duration: 1.0,
-          ease: "expo.out",
-        },
-        0.5
-      );
-    }
   }, [hasRevealed, cleanupSplits]);
 
-  // Listen for reveal event or fallback timer
+  // Listen for the reveal event
   useEffect(() => {
-    const handleReveal = () => {
-      revealHeader();
-    };
-
+    const handleReveal = () => revealHeader();
     window.addEventListener("reveal-header", handleReveal);
 
-    // Fallback in case event already fired or header loaded standalone
-    const timer = setTimeout(() => {
-      revealHeader();
-    }, 2400);
+    // Fallback timeout
+    const timer = setTimeout(() => revealHeader(), 2400);
 
     return () => {
       window.removeEventListener("reveal-header", handleReveal);
       clearTimeout(timer);
-      cleanupSplits();
+      cleanupSplits(barSplitsRef);
     };
   }, [revealHeader, cleanupSplits]);
 
+  // ---- Open / Close overlay ----
+  const openMenu = useCallback(() => {
+    if (!overlayRef.current || !navListRef.current) return;
+
+    if (openTimelineRef.current) {
+      openTimelineRef.current.kill();
+    }
+    cleanupSplits(navSplitsRef);
+
+    // SplitText on nav links
+    const navLinkEls = navListRef.current.querySelectorAll<HTMLElement>(`.${styles.navLink}`);
+    const parentSplits: SplitText[] = [];
+    const childSplits: SplitText[] = [];
+
+    navLinkEls.forEach((el) => {
+      const parent = new SplitText(el, {
+        type: "lines",
+        linesClass: styles.lineMask,
+      });
+      const child = new SplitText(parent.lines, {
+        type: "lines",
+        linesClass: styles.lineInner,
+      });
+      parentSplits.push(parent);
+      childSplits.push(child);
+    });
+
+    navSplitsRef.current = [...parentSplits, ...childSplits];
+    const navInnerLines = childSplits.flatMap((c) => c.lines);
+
+    // Initial states
+    gsap.set(navInnerLines, { yPercent: 110, opacity: 0 });
+    gsap.set(
+      [footerLeftRef.current, footerRightRef.current].filter(Boolean),
+      { opacity: 0, y: 12 }
+    );
+
+    const tl = gsap.timeline({
+      defaults: { ease: "expo.out" },
+    });
+    openTimelineRef.current = tl;
+
+    // 1. Slide overlay panel down (clip-path reveal)
+    tl.to(overlayRef.current, {
+      clipPath: "inset(0 0 0% 0)",
+      duration: 0.9,
+      ease: "expo.inOut",
+    }, 0);
+
+    // 2. Nav links SplitText reveal
+    tl.to(navInnerLines, {
+      yPercent: 0,
+      opacity: 1,
+      duration: 1.2,
+      stagger: 0.06,
+      ease: "expo.out",
+    }, 0.35);
+
+    // 3. Footer sections fade in
+    tl.to(
+      [footerLeftRef.current, footerRightRef.current].filter(Boolean),
+      { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 },
+      0.65
+    );
+  }, [cleanupSplits]);
+
+  const closeMenu = useCallback(() => {
+    if (!overlayRef.current) return;
+
+    if (openTimelineRef.current) {
+      openTimelineRef.current.kill();
+    }
+
+    const tl = gsap.timeline({
+      defaults: { ease: "expo.inOut" },
+      onComplete: () => {
+        cleanupSplits(navSplitsRef);
+        gsap.set(
+          [footerLeftRef.current, footerRightRef.current].filter(Boolean),
+          { opacity: 0, y: 12 }
+        );
+      },
+    });
+    openTimelineRef.current = tl;
+
+    // Slide overlay back up
+    tl.to(overlayRef.current, {
+      clipPath: "inset(0 0 100% 0)",
+      duration: 0.75,
+      ease: "expo.inOut",
+    }, 0);
+  }, [cleanupSplits]);
+
+  // Toggle handler
+  const handleToggle = useCallback(() => {
+    setIsOpen((prev) => {
+      const next = !prev;
+      if (next) {
+        openMenu();
+      } else {
+        closeMenu();
+      }
+      return next;
+    });
+  }, [openMenu, closeMenu]);
+
+  // Handle Escape key
+  useEffect(() => {
+    const handleEsc = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && isOpen) {
+        handleToggle();
+      }
+    };
+    window.addEventListener("keydown", handleEsc);
+    return () => window.removeEventListener("keydown", handleEsc);
+  }, [isOpen, handleToggle]);
+
   return (
     <header className={styles.header} ref={headerRef}>
-      {/* Brand: Circular Logo + YATRA ZENITH */}
-      <Link href="/" className={styles.brand} ref={brandRef}>
-        <Image
-          src="/images/logo.png"
-          alt="Yatra Zenith"
-          width={42}
-          height={42}
-          className={styles.logoImg}
-          priority
-        />
-        <div className={styles.brandText}>
-          <span className={styles.brandYatra}>Yatra</span>
-          <span className={styles.brandZenith}>✦ Zenith ✦</span>
-        </div>
-      </Link>
-
-      {/* Nav links: Home, Destinations, About, Journal */}
-      <nav>
-        <ul className={styles.nav} ref={navRef}>
-          {navLinks.map((item) => (
-            <li key={item.title} className={styles.navItem}>
-              <Link
-                href={item.href}
-                className={`${styles.navLink} ${item.isActive ? styles.active : ""}`}
-              >
-                {item.title}
-              </Link>
-              {item.isActive && <div className={styles.activeIndicator} />}
-            </li>
-          ))}
-        </ul>
-      </nav>
-
-      {/* Right Actions: Search Icon + Plan Your Trip Button */}
-      <div className={styles.actions} ref={actionsRef}>
+      {/* ================================================================
+          Top Bar — always fixed on top (both closed & open)
+          ================================================================ */}
+      <div className={styles.topBar} ref={topBarRef}>
+        {/* Left: Hamburger / Close */}
         <button
           type="button"
-          className={styles.searchBtn}
-          aria-label="Search"
-          title="Search"
+          className={`${styles.menuToggle} ${isOpen ? styles.dark : ""}`}
+          onClick={handleToggle}
+          aria-label={isOpen ? "Close menu" : "Open menu"}
+          aria-expanded={isOpen}
         >
-          <svg
-            width="19"
-            height="19"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-            strokeLinejoin="round"
-          >
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-          </svg>
+          <span className={`${styles.hamburgerIcon} ${isOpen ? styles.hamburgerOpen : ""}`}>
+            <span />
+            <span />
+          </span>
+          <span className={styles.menuLabel}>
+            {isOpen ? "Close" : "Menu"}
+          </span>
         </button>
 
-        <Link href="#plan" className={styles.planTripBtn}>
-          <span>Plan Your Trip</span>
-          <span className={styles.arrow}>→</span>
+        {/* Center: Brand (stays visible, transitions to dark mode in menu) */}
+        <Link
+          href="/"
+          className={`${styles.brand} ${isOpen ? styles.dark : ""}`}
+          onClick={() => isOpen && handleToggle()}
+        >
+          <Image
+            src="/images/logo.png"
+            alt="Yatra Zenith"
+            width={36}
+            height={36}
+            className={styles.logoImg}
+            priority
+          />
+          <div className={styles.brandTextGroup}>
+            <span className={styles.brandTitle}>Yatra</span>
+            <span className={styles.brandSub}>Zenith / Journeys Above the Ordinary</span>
+          </div>
         </Link>
+
+        {/* Right: CTA Pill (stays visible, transitions to dark mode in menu) */}
+        <Link
+          href="#plan"
+          className={`${styles.ctaPill} ${isOpen ? styles.dark : ""}`}
+          onClick={() => isOpen && handleToggle()}
+        >
+          Plan Your Journey
+        </Link>
+      </div>
+
+      {/* ================================================================
+          Overlay Panel — the dropdown menu
+          ================================================================ */}
+      <div className={styles.overlay} ref={overlayRef}>
+        {/* Nav Links */}
+        <div className={styles.overlayBody}>
+          <ul className={styles.navList} ref={navListRef}>
+            {navLinks.map((item) => (
+              <li key={item.title} className={styles.navItem}>
+                <Link
+                  href={item.href}
+                  className={styles.navLink}
+                  onClick={() => isOpen && handleToggle()}
+                >
+                  {item.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        {/* Footer: Contact + Socials */}
+        <div className={styles.overlayFooter}>
+          <div className={styles.footerSection} ref={footerLeftRef}>
+            <span className={styles.footerLabel}>Contact</span>
+            {contactLinks.map((c) => (
+              <a
+                key={c.label}
+                href={c.href}
+                className={styles.footerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {c.label}: {c.value}
+              </a>
+            ))}
+          </div>
+          <div className={styles.footerSectionRight} ref={footerRightRef}>
+            <span className={styles.footerLabel}>Socials</span>
+            {socialLinks.map((s) => (
+              <a
+                key={s.label}
+                href={s.href}
+                className={styles.footerLink}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                {s.label}
+              </a>
+            ))}
+          </div>
+        </div>
       </div>
     </header>
   );

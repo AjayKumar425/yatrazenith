@@ -39,7 +39,6 @@ body {
   color: var(--color-dark);
 }
 
-/* Lenis smooth scrolling */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -61,7 +60,6 @@ html.lenis body {
   pointer-events: none;
 }
 
-/* Custom selection */
 ::selection {
   background-color: var(--color-dark);
   color: var(--color-white);

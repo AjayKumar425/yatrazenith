@@ -26,7 +26,6 @@ export default function Landing() {
   const timelineRef = useRef<gsap.core.Timeline | null>(null);
   const splitsRef = useRef<SplitText[]>([]);
 
-  // Compute responsive clip-path coordinates for the rising slit window
   const getClipCoordinates = useCallback(() => {
     if (typeof window === "undefined") {
       return {
@@ -35,22 +34,22 @@ export default function Landing() {
       };
     }
     const width = window.innerWidth;
-    let offset = 12; // Desktop width: 24vw (38% to 62%)
+    let offset = 12; 
     let offsetTop = "42%";
     let logoTop = "26%";
 
     if (width < 1024) {
-      offset = 18; // Tablet: 36vw (32% to 68%)
+      offset = 18; 
       offsetTop = "44%";
       logoTop = "28%";
     }
     if (width < 768) {
-      offset = 27; // Mobile: 54vw (23% to 77%)
+      offset = 27; 
       offsetTop = "42%";
       logoTop = "26%";
     }
     if (width < 480) {
-      offset = 35; // Small mobile: 70vw (15% to 85%)
+      offset = 35; 
       offsetTop = "40%";
       logoTop = "24%";
     }
@@ -106,7 +105,7 @@ export default function Landing() {
 
     cleanupSplits();
 
-    // 1. Initial Preloader State: Centered brand logo on cream background
+    // Initial Preloader State
     gsap.set(preloaderRef.current, { display: "block", autoAlpha: 1 });
     gsap.set(preloaderScreenRef.current, { autoAlpha: 1 });
     gsap.set(preloaderLogoRef.current, {
@@ -118,7 +117,7 @@ export default function Landing() {
       scale: 1,
     });
 
-    // 2. Landing Page (video section): starts down below (y: 100%) clipped to the small window
+    // video section
     gsap.set(landingPageRef.current, {
       clipPath: initialClip,
       y: "100%",
@@ -127,8 +126,7 @@ export default function Landing() {
       scale: 1.15,
     });
 
-    // 3. GSAP SplitText Mask Reveal Setup
-    // Wrap eyebrow into masked lines
+    // GSAP SplitText
     const eyebrowParent = new SplitText(heroEyebrowRef.current, {
       type: "lines",
       linesClass: styles.lineMask,
@@ -138,7 +136,6 @@ export default function Landing() {
       linesClass: styles.lineInner,
     });
 
-    // Wrap headline into masked lines
     const titleParent = new SplitText(heroTitleRef.current, {
       type: "lines",
       linesClass: styles.lineMask,
@@ -173,7 +170,6 @@ export default function Landing() {
 
     timelineRef.current = tl;
 
-    // STEP 1: The small section comes from the bottom into the preloader canvas
     tl.to(
       landingPageRef.current,
       {
@@ -184,7 +180,6 @@ export default function Landing() {
       0
     );
 
-    // Simultaneously, the preloader logo shifts up to sit above the rising window
     tl.to(
       preloaderLogoRef.current,
       {
@@ -195,7 +190,7 @@ export default function Landing() {
       0
     );
 
-    // STEP 2: The small section MASKS OUT into FULL SCREEN
+    // Mask
     tl.to(
       landingPageRef.current,
       {
@@ -206,7 +201,7 @@ export default function Landing() {
       1.75
     );
 
-    // Background video smoothly scales to 1.0 (subtle zoom-out parallax)
+    // Parallax
     tl.to(
       backgroundMediaRef.current,
       {
@@ -217,7 +212,7 @@ export default function Landing() {
       1.75
     );
 
-    // Preloader logo glides up and fades away
+    // Logo Move
     tl.to(
       preloaderLogoRef.current,
       {
@@ -230,7 +225,7 @@ export default function Landing() {
       1.75
     );
 
-    // Preloader background fades out as the video fills the screen
+    // Video Fill/Mask
     tl.to(
       preloaderScreenRef.current,
       {
@@ -241,12 +236,10 @@ export default function Landing() {
       2.6
     );
 
-    // Trigger Header SplitText reveal as mask finishes expanding
     tl.call(() => {
       window.dispatchEvent(new CustomEvent("reveal-header"));
     }, undefined, 2.15);
 
-    // STEP 3: GSAP SplitText Mask Reveal (Lines slide up from behind their overflow masks)
     tl.to(
       eyebrowChild.lines,
       {
@@ -271,7 +264,6 @@ export default function Landing() {
     );
   }, [getClipCoordinates, cleanupSplits]);
 
-  // Run on mount once fonts are ready
   useGSAP(
     () => {
       if (typeof document !== "undefined" && document.fonts) {
@@ -287,9 +279,6 @@ export default function Landing() {
 
   return (
     <main className={styles.landing} ref={containerRef}>
-      {/* ====================================================================
-          1. Preloader Screen (Centered Brand Logo & Text)
-          ==================================================================== */}
       <div className={styles.preloader} ref={preloaderRef}>
         <div className={styles.preloaderScreen} ref={preloaderScreenRef} />
         <div className={styles.preloaderLogo} ref={preloaderLogoRef}>
@@ -310,9 +299,6 @@ export default function Landing() {
         </div>
       </div>
 
-      {/* ====================================================================
-          2. The Landing Page (Comes from bottom, masks out to full screen)
-          ==================================================================== */}
       <section className={styles.landingPage} ref={landingPageRef}>
         <div className={styles.backgroundMedia} ref={backgroundMediaRef}>
           <video
@@ -329,7 +315,6 @@ export default function Landing() {
           <div className={styles.overlayVignette} />
         </div>
 
-        {/* Centered Editorial Content (SplitText Mask Reveal) */}
         <div className={styles.heroContainer}>
           <div className={styles.heroContent} ref={heroContentRef}>
             <p className={styles.heroEyebrow} ref={heroEyebrowRef}>
