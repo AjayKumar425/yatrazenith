@@ -32,6 +32,14 @@
   padding: 0 3rem;
   z-index: 105;
   pointer-events: auto;
+  transition: background-color 0.4s ease, border-color 0.4s ease, backdrop-filter 0.4s ease;
+
+  &.scrolled {
+    background-color: rgba(246, 244, 239, 0.88);
+    backdrop-filter: blur(14px);
+    -webkit-backdrop-filter: blur(14px);
+    border-bottom: 1px solid rgba(50, 32, 24, 0.08);
+  }
 
   @media (max-width: 768px) {
     height: 64px;

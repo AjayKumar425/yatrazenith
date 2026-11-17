@@ -21,6 +21,21 @@ export default function Header() {
 
   const [isOpen, setIsOpen] = useState(false);
   const [hasRevealed, setHasRevealed] = useState(false);
+  const [isScrolled, setIsScrolled] = useState(false);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      const heroHeight = window.innerHeight;
+      setIsScrolled(window.scrollY > heroHeight - 90);
+    };
+
+    window.addEventListener("scroll", handleScroll, { passive: true });
+    handleScroll();
+
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
+  const isDark = isOpen || isScrolled;
 
   const barSplitsRef = useRef<SplitText[]>([]);
   const navSplitsRef = useRef<SplitText[]>([]);
@@ -228,11 +243,11 @@ export default function Header() {
       {/* ================================================================
           Top Bar — always fixed on top (both closed & open)
           ================================================================ */}
-      <div className={styles.topBar} ref={topBarRef}>
+      <div className={`${styles.topBar} ${isScrolled && !isOpen ? styles.scrolled : ""}`} ref={topBarRef}>
         {/* Left: Hamburger / Close */}
         <button
           type="button"
-          className={`${styles.menuToggle} ${isOpen ? styles.dark : ""}`}
+          className={`${styles.menuToggle} ${isDark ? styles.dark : ""}`}
           onClick={handleToggle}
           aria-label={isOpen ? "Close menu" : "Open menu"}
           aria-expanded={isOpen}
@@ -246,10 +261,10 @@ export default function Header() {
           </span>
         </button>
 
-        {/* Center: Brand (stays visible, transitions to dark mode in menu) */}
+        {/* Center: Brand (stays visible, transitions to dark mode in menu or on scroll) */}
         <Link
           href="/"
-          className={`${styles.brand} ${isOpen ? styles.dark : ""}`}
+          className={`${styles.brand} ${isDark ? styles.dark : ""}`}
           onClick={() => isOpen && handleToggle()}
         >
           <Image
@@ -266,10 +281,10 @@ export default function Header() {
           </div>
         </Link>
 
-        {/* Right: CTA Pill (stays visible, transitions to dark mode in menu) */}
+        {/* Right: CTA Pill (stays visible, transitions to dark mode in menu or on scroll) */}
         <Link
           href="#plan"
-          className={`${styles.ctaPill} ${isOpen ? styles.dark : ""}`}
+          className={`${styles.ctaPill} ${isDark ? styles.dark : ""}`}
           onClick={() => isOpen && handleToggle()}
         >
           Plan Your Journey

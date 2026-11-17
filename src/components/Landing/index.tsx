@@ -153,6 +153,12 @@ export default function Landing() {
       opacity: 0,
     });
 
+    // Temporarily lock scroll during preloader reveal
+    if (typeof document !== "undefined") {
+      document.body.style.overflow = "hidden";
+      window.scrollTo(0, 0);
+    }
+
     const tl = gsap.timeline({
       defaults: { ease: "expo.inOut" },
       onComplete: () => {
@@ -164,6 +170,9 @@ export default function Landing() {
         }
         if (preloaderRef.current) {
           gsap.set(preloaderRef.current, { display: "none" });
+        }
+        if (typeof document !== "undefined") {
+          document.body.style.overflow = "";
         }
       },
     });
@@ -179,7 +188,7 @@ export default function Landing() {
       },
       0
     );
-
+``
     tl.to(
       preloaderLogoRef.current,
       {
@@ -264,6 +273,15 @@ export default function Landing() {
     );
   }, [getClipCoordinates, cleanupSplits]);
 
+  // Clean up overflow on unmount
+  useEffect(() => {
+    return () => {
+      if (typeof document !== "undefined") {
+        document.body.style.overflow = "";
+      }
+    };
+  }, []);
+
   useGSAP(
     () => {
       if (typeof document !== "undefined" && document.fonts) {
@@ -278,7 +296,7 @@ export default function Landing() {
   );
 
   return (
-    <main className={styles.landing} ref={containerRef}>
+    <section className={styles.landing} ref={containerRef}>
       <div className={styles.preloader} ref={preloaderRef}>
         <div className={styles.preloaderScreen} ref={preloaderScreenRef} />
         <div className={styles.preloaderLogo} ref={preloaderLogoRef}>
@@ -299,7 +317,7 @@ export default function Landing() {
         </div>
       </div>
 
-      <section className={styles.landingPage} ref={landingPageRef}>
+      <div className={styles.landingPage} ref={landingPageRef}>
         <div className={styles.backgroundMedia} ref={backgroundMediaRef}>
           <video
             ref={videoRef}
@@ -328,7 +346,7 @@ export default function Landing() {
             </h1>
           </div>
         </div>
-      </section>
-    </main>
+      </div>
+    </section>
   );
 }
