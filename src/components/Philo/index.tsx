@@ -97,10 +97,6 @@ export default function Philo() {
   return (
     <section className={styles.philo} ref={philoRef}>
       <div className={styles.container}>
-        <span className={styles.eyebrow}>
-          01 <span>/</span> OUR PHILOSOPHY
-        </span>
-
         <div className={styles.heading}>
           <h1>Travel well. Go deeper.</h1>
         </div>
@@ -111,9 +107,6 @@ export default function Philo() {
             and considered itineraries for a more personal experience of the
             Himalayas.
           </p>
-          <span className={styles.subTag}>
-            THOUGHTFULLY CURATED <span>/</span> DEEPLY PERSONAL
-          </span>
         </div>
       </div>
     </section>
