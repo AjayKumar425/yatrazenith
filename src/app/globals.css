@@ -1,4 +1,21 @@
+@font-face {
+  font-family: "PP Editorial New";
+  src: url("/font/PP%20Editorial%20New%20Ultralight.woff2") format("woff2");
+  font-weight: 200;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "PP Editorial New";
+  src: url("/font/PP%20Editorial%20New.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
 :root {
+  --color-obsidian: #140f0c;
   --color-dark: #322018;
   --color-dark-rgb: 50, 32, 24;
   --color-light: #eae5df;
@@ -7,16 +24,22 @@
   --color-white-rgb: 248, 246, 244;
   --color-sand: #f5f2ed;
   --color-accent: #c49a6c;
+  --color-accent-rgb: 196, 154, 108;
   --color-stone-100: #e0d9d1;
   --color-stone-200: #cec3b6;
   --color-border: rgba(50, 32, 24, 0.12);
   --color-border-light: rgba(248, 246, 244, 0.2);
 
-  --font-serif-family: var(--font-serif), "Cormorant Garamond", Garamond, Georgia, serif;
+  --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
+
+  --font-serif-family: "PP Editorial New", Georgia, serif;
   --font-sans-family: var(--font-sans), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  --font-mono-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
 
-* {
+*,
+*::before,
+*::after {
   margin: 0;
   padding: 0;
   box-sizing: border-box;
@@ -24,21 +47,43 @@
 
 html {
   font-family: var(--font-sans-family);
-  background-color: var(--color-light);
+  background-color: var(--color-obsidian);
   color: var(--color-dark);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  overscroll-behavior: none;
+
+  scrollbar-width: thin;
+  scrollbar-color: rgba(196, 154, 108, 0.45) var(--color-obsidian);
+}
+
+html::-webkit-scrollbar {
+  width: 5px;
+}
+
+html::-webkit-scrollbar-track {
+  background: var(--color-obsidian);
+}
+
+html::-webkit-scrollbar-thumb {
+  background: rgba(196, 154, 108, 0.42);
+  border-radius: 999px;
+}
+
+html::-webkit-scrollbar-thumb:hover {
+  background: var(--color-accent);
 }
 
 body {
   width: 100%;
-  min-height: 100vh;
-  overflow-x: hidden;
+  min-height: 100svh;
+  overflow-x: clip;
   background-color: var(--color-light);
   color: var(--color-dark);
 }
 
+/* Lenis smooth scroll */
 html.lenis,
 html.lenis body {
   height: auto;
@@ -53,7 +98,7 @@ html.lenis body {
 }
 
 .lenis.lenis-stopped {
-  overflow: hidden;
+  overscroll-behavior: none;
 }
 
 .lenis.lenis-scrolling iframe {
@@ -65,10 +110,23 @@ html.lenis body {
   color: var(--color-white);
 }
 
-img, video {
+:focus-visible {
+  outline: 1px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+img,
+picture,
+video,
+canvas,
+svg {
   max-width: 100%;
-  height: auto;
   display: block;
+}
+
+img,
+video {
+  height: auto;
 }
 
 a {
