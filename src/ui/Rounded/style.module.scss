@@ -1,33 +1,42 @@
-.roundedButton{
-  border-radius: 3em;
-  border: 1px solid #151515;
-  cursor: pointer;
+.roundedButton {
   position: relative;
-  display: flex;
+  display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 15px 60px 15px 60px;
+  padding: 15px 60px;
+  border-radius: 3em;
+  border: 1px solid var(--rounded-border, #151515);
+  cursor: pointer;
+  overflow: hidden;
+  isolation: isolate;
+  transform: translateZ(0); 
 
-  p, a {
+  p,
+  a,
+  span {
     position: relative;
     z-index: 1;
     transition: color 0.4s linear;
     text-decoration: none;
-    color: #151515;
+    color: var(--rounded-color, #151515);
   }
 
-
-  &:hover{
-    p, a{
-      color: white;
+  &:hover {
+    p,
+    a,
+    span {
+      color: var(--rounded-hover-color, #ffffff);
     }
   }
 }
 
-.circle{
+.circle {
+  position: absolute;
+  top: 100%;
   width: 100%;
   height: 150%;
-  position: absolute;
   border-radius: 50%;
-  top: 100%;
+  z-index: 0;
+  pointer-events: none;
+  will-change: transform;
 }
