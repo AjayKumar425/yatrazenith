@@ -6,323 +6,313 @@ import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
+import Rounded from "@/ui/Rounded";
 import styles from "./style.module.scss";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 export default function Landing() {
-  const heroRef = useRef<HTMLElement>(null);
-  const mediaInnerRef = useRef<HTMLDivElement>(null);
-  const videoRef = useRef<HTMLVideoElement>(null);
-  const innerRef = useRef<HTMLDivElement>(null);
-  const metaRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const dividerRef = useRef<HTMLDivElement>(null);
-  const leadRef = useRef<HTMLParagraphElement>(null);
-  const buttonsRef = useRef<HTMLDivElement>(null);
-  const scrollCueRef = useRef<HTMLDivElement>(null);
-  const scrollLineRef = useRef<HTMLDivElement>(null);
+    const heroRef = useRef<HTMLElement>(null);
+    const mediaInnerRef = useRef<HTMLDivElement>(null);
+    const videoRef = useRef<HTMLVideoElement>(null);
+    const innerRef = useRef<HTMLDivElement>(null);
+    const metaRef = useRef<HTMLDivElement>(null);
+    const titleRef = useRef<HTMLHeadingElement>(null);
+    const dividerRef = useRef<HTMLDivElement>(null);
+    const leadRef = useRef<HTMLParagraphElement>(null);
+    const buttonsRef = useRef<HTMLDivElement>(null);
+    const scrollCueRef = useRef<HTMLDivElement>(null);
+    const scrollLineRef = useRef<HTMLDivElement>(null);
 
-  useGSAP(
-      () => {
-        const hero = heroRef.current;
-        if (!hero) return;
+    useGSAP(
+        () => {
+            const hero = heroRef.current;
+            if (!hero) return;
 
-        let isCancelled = false;
-        let hasPlayed = false;
-        let titleSplit: SplitText | null = null;
-        let leadSplit: SplitText | null = null;
-        let revealTl: gsap.core.Timeline | null = null;
-        let scrollPulseTl: gsap.core.Timeline | null = null;
+            let isCancelled = false;
+            let hasPlayed = false;
+            let titleSplit: SplitText | null = null;
+            let leadSplit: SplitText | null = null;
+            let revealTl: gsap.core.Timeline | null = null;
+            let scrollPulseTl: gsap.core.Timeline | null = null;
 
-        // 1. Scroll-driven multi-layer parallax (isolated from intro tweens)
-        const mm = gsap.matchMedia();
+            const mm = gsap.matchMedia();
 
-        mm.add(
-            {
-              isDesktop: "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
-              isMobile: "(max-width: 900px) and (prefers-reduced-motion: no-preference)",
-            },
-            (context) => {
-              const { isDesktop } = context.conditions ?? {};
-
-              // Background video depth shift (mediaInner is 128% tall so zero edge gaps)
-              gsap.fromTo(
-                  mediaInnerRef.current,
-                  { yPercent: 0, scale: 1 },
-                  {
-                    yPercent: isDesktop ? 10 : 6,
-                    scale: isDesktop ? 1.05 : 1.03,
-                    ease: "none",
-                    scrollTrigger: {
-                      trigger: hero,
-                      start: "top top",
-                      end: "bottom top",
-                      scrub: true,
-                    },
-                  }
-              );
-
-              // Foreground editorial block counter-lift & soft fade
-              gsap.to(innerRef.current, {
-                yPercent: isDesktop ? -10 : -5,
-                opacity: 0.2,
-                ease: "none",
-                scrollTrigger: {
-                  trigger: hero,
-                  start: "top top",
-                  end: "bottom top",
-                  scrub: true,
+            mm.add(
+                {
+                    isDesktop: "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
+                    isMobile: "(max-width: 900px) and (prefers-reduced-motion: no-preference)",
                 },
-              });
+                (context) => {
+                    const { isDesktop } = context.conditions ?? {};
 
-              // Early exit for the scroll cue
-              if (scrollCueRef.current) {
-                gsap.to(scrollCueRef.current, {
-                  y: -18,
-                  autoAlpha: 0,
-                  ease: "none",
-                  scrollTrigger: {
-                    trigger: hero,
-                    start: "top top",
-                    end: "22% top",
-                    scrub: true,
-                  },
-                });
-              }
+                    gsap.fromTo(
+                        mediaInnerRef.current,
+                        { yPercent: 0, scale: 1 },
+                        {
+                            yPercent: isDesktop ? 10 : 6,
+                            scale: isDesktop ? 1.05 : 1.03,
+                            ease: "none",
+                            scrollTrigger: {
+                                trigger: hero,
+                                start: "top top",
+                                end: "bottom top",
+                                scrub: true,
+                            },
+                        }
+                    );
+
+                    gsap.to(innerRef.current, {
+                        yPercent: isDesktop ? -10 : -5,
+                        opacity: 0.2,
+                        ease: "none",
+                        scrollTrigger: {
+                            trigger: hero,
+                            start: "top top",
+                            end: "bottom top",
+                            scrub: true,
+                        },
+                    });
+
+                    if (scrollCueRef.current) {
+                        gsap.to(scrollCueRef.current, {
+                            y: -18,
+                            autoAlpha: 0,
+                            ease: "none",
+                            scrollTrigger: {
+                                trigger: hero,
+                                start: "top top",
+                                end: "22% top",
+                                scrub: true,
+                            },
+                        });
+                    }
+                }
+            );
+
+            const prefersReducedMotion = window.matchMedia(
+                "(prefers-reduced-motion: reduce)"
+            ).matches;
+
+            if (prefersReducedMotion) {
+                gsap.set(
+                    [
+                        metaRef.current,
+                        titleRef.current,
+                        leadRef.current,
+                        buttonsRef.current,
+                        scrollCueRef.current,
+                    ],
+                    { autoAlpha: 1 }
+                );
+                gsap.set(dividerRef.current, { scaleX: 1 });
+                return () => mm.revert();
             }
-        );
 
-        // 2. Initial hidden state for intro choreography
-        const prefersReducedMotion = window.matchMedia(
-            "(prefers-reduced-motion: reduce)"
-        ).matches;
+            gsap.set(videoRef.current, { scale: 1.14 });
+            gsap.set(
+                [
+                    metaRef.current,
+                    titleRef.current,
+                    leadRef.current,
+                    buttonsRef.current,
+                    scrollCueRef.current,
+                ],
+                { autoAlpha: 0 }
+            );
+            gsap.set(dividerRef.current, { scaleX: 0, transformOrigin: "left center" });
 
-        if (prefersReducedMotion) {
-          gsap.set(
-              [
-                metaRef.current,
-                titleRef.current,
-                leadRef.current,
-                buttonsRef.current,
-                scrollCueRef.current,
-              ],
-              { autoAlpha: 1 }
-          );
-          gsap.set(dividerRef.current, { scaleX: 1 });
-          return () => mm.revert();
-        }
+            const playReveal = () => {
+                if (isCancelled || hasPlayed || !titleRef.current || !leadRef.current) {
+                    return;
+                }
+                hasPlayed = true;
 
-        gsap.set(videoRef.current, { scale: 1.14 });
-        gsap.set(
-            [
-              metaRef.current,
-              titleRef.current,
-              leadRef.current,
-              buttonsRef.current,
-              scrollCueRef.current,
-            ],
-            { autoAlpha: 0 }
-        );
-        gsap.set(dividerRef.current, { scaleX: 0, transformOrigin: "left center" });
-
-        // 3. Font-safe SplitText setup & synchronized reveal
-        const playReveal = () => {
-          if (isCancelled || hasPlayed || !titleRef.current || !leadRef.current) {
-            return;
-          }
-          hasPlayed = true;
-
-          titleSplit = SplitText.create(titleRef.current, {
-            type: "lines,words",
-            mask: "lines",
-            linesClass: styles.splitLine,
-          });
-
-          leadSplit = SplitText.create(leadRef.current, {
-            type: "lines",
-            mask: "lines",
-            linesClass: styles.splitLine,
-          });
-
-          gsap.set([titleRef.current, leadRef.current], { autoAlpha: 1 });
-
-          revealTl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-          revealTl
-              // Cinema settle on the hero video as the preloader curtain rises
-              .to(
-                  videoRef.current,
-                  {
-                    scale: 1,
-                    duration: 1.85,
-                    ease: "power3.out",
-                  },
-                  0
-              )
-              // Top editorial metadata
-              .fromTo(
-                  metaRef.current,
-                  { y: 18, autoAlpha: 0 },
-                  { y: 0, autoAlpha: 1, duration: 1.0 },
-                  0.15
-              )
-              // Masked line reveal on display headline
-              .fromTo(
-                  titleSplit.lines,
-                  { yPercent: 112, rotate: 1.2 },
-                  {
-                    yPercent: 0,
-                    rotate: 0,
-                    duration: 1.3,
-                    stagger: 0.11,
-                  },
-                  0.2
-              )
-              // Hairline rule draw
-              .to(
-                  dividerRef.current,
-                  {
-                    scaleX: 1,
-                    duration: 1.15,
-                    ease: "expo.inOut",
-                  },
-                  0.38
-              )
-              // Masked line reveal on lead copy
-              .fromTo(
-                  leadSplit.lines,
-                  { yPercent: 110 },
-                  {
-                    yPercent: 0,
-                    duration: 1.05,
-                    stagger: 0.06,
-                  },
-                  0.48
-              )
-              // CTA buttons & scroll cue
-              .fromTo(
-                  buttonsRef.current,
-                  { y: 22, autoAlpha: 0 },
-                  { y: 0, autoAlpha: 1, duration: 1.0 },
-                  0.58
-              )
-              .fromTo(
-                  scrollCueRef.current,
-                  { y: 14, autoAlpha: 0 },
-                  { y: 0, autoAlpha: 1, duration: 0.9 },
-                  0.72
-              );
-
-          // Ambient editorial loop on scroll indicator line
-          if (scrollLineRef.current) {
-            scrollPulseTl = gsap.timeline({ repeat: -1, delay: 1.2 });
-            scrollPulseTl
-                .fromTo(
-                    scrollLineRef.current,
-                    { scaleY: 0, transformOrigin: "top center" },
-                    { scaleY: 1, duration: 1.0, ease: "expo.inOut" }
-                )
-                .to(scrollLineRef.current, {
-                  scaleY: 0,
-                  transformOrigin: "bottom center",
-                  duration: 1.0,
-                  ease: "expo.inOut",
-                  delay: 0.25,
+                titleSplit = SplitText.create(titleRef.current, {
+                    type: "lines,words",
+                    mask: "lines",
+                    linesClass: styles.splitLine,
                 });
-          }
-        };
 
-        const triggerWhenFontsReady = () => {
-          document.fonts.ready.then(playReveal);
-        };
+                leadSplit = SplitText.create(leadRef.current, {
+                    type: "lines",
+                    mask: "lines",
+                    linesClass: styles.splitLine,
+                });
 
-        // Listen for Preloader exit; play immediately if already completed (e.g., route return)
-        let fallbackTimer: number | undefined;
+                gsap.set([titleRef.current, leadRef.current], { autoAlpha: 1 });
 
-        if (window.__yatraPreloaderDone) {
-          triggerWhenFontsReady();
-        } else {
-          window.addEventListener("preloader-exit", triggerWhenFontsReady, {
-            once: true,
-          });
-          // Safety fallback in case Landing is rendered without Preloader
-          fallbackTimer = window.setTimeout(triggerWhenFontsReady, 2600);
-        }
+                revealTl = gsap.timeline({ defaults: { ease: "expo.out" } });
 
-        return () => {
-          isCancelled = true;
-          if (fallbackTimer) window.clearTimeout(fallbackTimer);
-          window.removeEventListener("preloader-exit", triggerWhenFontsReady);
-          revealTl?.kill();
-          scrollPulseTl?.kill();
-          titleSplit?.revert();
-          leadSplit?.revert();
-          mm.revert();
-        };
-      },
-      { scope: heroRef }
-  );
+                revealTl
+                    .to(
+                        videoRef.current,
+                        {
+                            scale: 1,
+                            duration: 1.85,
+                            ease: "power3.out",
+                        },
+                        0
+                    )
+                    .fromTo(
+                        metaRef.current,
+                        { y: 18, autoAlpha: 0 },
+                        { y: 0, autoAlpha: 1, duration: 1.0 },
+                        0.15
+                    )
+                    .fromTo(
+                        titleSplit.lines,
+                        { yPercent: 112, rotate: 1.2 },
+                        {
+                            yPercent: 0,
+                            rotate: 0,
+                            duration: 1.3,
+                            stagger: 0.11,
+                        },
+                        0.2
+                    )
+                    .to(
+                        dividerRef.current,
+                        {
+                            scaleX: 1,
+                            duration: 1.15,
+                            ease: "expo.inOut",
+                        },
+                        0.38
+                    )
+                    .fromTo(
+                        leadSplit.lines,
+                        { yPercent: 110 },
+                        {
+                            yPercent: 0,
+                            duration: 1.05,
+                            stagger: 0.06,
+                        },
+                        0.48
+                    )
+                    .fromTo(
+                        buttonsRef.current,
+                        { y: 22, autoAlpha: 0 },
+                        { y: 0, autoAlpha: 1, duration: 1.0 },
+                        0.58
+                    )
+                    .fromTo(
+                        scrollCueRef.current,
+                        { y: 14, autoAlpha: 0 },
+                        { y: 0, autoAlpha: 1, duration: 0.9 },
+                        0.72
+                    );
 
-  return (
-      <section ref={heroRef} id="top" className={styles.hero}>
-        <div className={styles.media} aria-hidden="true">
-          <div ref={mediaInnerRef} className={styles.mediaInner}>
-            <video
-                ref={videoRef}
-                src="/video/intro.mp4"
-                autoPlay
-                loop
-                muted
-                playsInline
-                preload="auto"
-                className={styles.video}
-            />
-          </div>
-        </div>
+                if (scrollLineRef.current) {
+                    scrollPulseTl = gsap.timeline({ repeat: -1, delay: 1.2 });
+                    scrollPulseTl
+                        .fromTo(
+                            scrollLineRef.current,
+                            { scaleY: 0, transformOrigin: "top center" },
+                            { scaleY: 1, duration: 1.0, ease: "expo.inOut" }
+                        )
+                        .to(scrollLineRef.current, {
+                            scaleY: 0,
+                            transformOrigin: "bottom center",
+                            duration: 1.0,
+                            ease: "expo.inOut",
+                            delay: 0.25,
+                        });
+                }
+            };
 
-        <div className={styles.vignette} aria-hidden="true" />
+            const triggerWhenFontsReady = () => {
+                document.fonts.ready.then(playReveal);
+            };
 
-        <div ref={innerRef} className={styles.inner}>
-          <div ref={metaRef} className={styles.meta}>
-            <span>Expeditions &amp; Retreat — Himalayas</span>
-            <span>Private Travel Atelier · Uttarakhand</span>
-          </div>
+            let fallbackTimer: number | undefined;
 
-          <h1 ref={titleRef} className={styles.title}>
-            Journeys Above <em>the Ordinary</em>
-          </h1>
+            if (window.__yatraPreloaderDone) {
+                triggerWhenFontsReady();
+            } else {
+                window.addEventListener("preloader-exit", triggerWhenFontsReady, {
+                    once: true,
+                });
+                fallbackTimer = window.setTimeout(triggerWhenFontsReady, 2600);
+            }
 
-          <div ref={dividerRef} className={styles.divider} aria-hidden="true" />
+            return () => {
+                isCancelled = true;
+                if (fallbackTimer) window.clearTimeout(fallbackTimer);
+                window.removeEventListener("preloader-exit", triggerWhenFontsReady);
+                revealTl?.kill();
+                scrollPulseTl?.kill();
+                titleSplit?.revert();
+                leadSplit?.revert();
+                mm.revert();
+            };
+        },
+        { scope: heroRef }
+    );
 
-          <div className={styles.bottom}>
-            <p ref={leadRef} className={styles.lead}>
-              Find the spirit of the Himalayas through privately curated expeditions,
-              architectural mountain sanctuaries, and unhurried passage across India&apos;s
-              highest valleys.
-            </p>
-
-            {/* Ready to wrap with Magnetic / Rounded button components */}
-            <div ref={buttonsRef} className={styles.buttons}>
-              <Link href="#expeditions" className={styles.btnPrimary}>
-                <span>Explore Expeditions</span>
-                <span className={styles.arrow} aria-hidden="true">
-                →
-              </span>
-              </Link>
-              <Link href="#plan" className={styles.btnGhost}>
-                <span>Private Brief</span>
-              </Link>
+    return (
+        <section ref={heroRef} id="top" className={styles.hero}>
+            <div className={styles.media} aria-hidden="true">
+                <div ref={mediaInnerRef} className={styles.mediaInner}>
+                    <video
+                        ref={videoRef}
+                        src="/video/intro.mp4"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        preload="auto"
+                        className={styles.video}
+                    />
+                </div>
             </div>
 
-            <div ref={scrollCueRef} className={styles.scrollCue} aria-hidden="true">
-              <span>Scroll</span>
-              <div className={styles.scrollTrack}>
-                <div ref={scrollLineRef} className={styles.scrollLine} />
-              </div>
+            <div className={styles.vignette} aria-hidden="true" />
+
+            <div ref={innerRef} className={styles.inner}>
+                <div ref={metaRef} className={styles.meta}>
+                    <span>Expeditions &amp; Retreat — Himalayas</span>
+                    <span>Private Travel Atelier · Uttarakhand</span>
+                </div>
+
+                <h1 ref={titleRef} className={styles.title}>
+                    Journeys Above <em>the Ordinary</em>
+                </h1>
+
+                <div ref={dividerRef} className={styles.divider} aria-hidden="true" />
+
+                <div className={styles.bottom}>
+                    <p ref={leadRef} className={styles.lead}>
+                        Find the spirit of the Himalayas through privately curated expeditions,
+                        architectural mountain sanctuaries, and unhurried passage across India&apos;s
+                        highest valleys.
+                    </p>
+
+                    <div ref={buttonsRef} className={styles.buttons}>
+                        <Rounded className={styles.btnPrimary} backgroundColor="#c49a6c">
+                            <Link href="#expeditions" className={styles.btnLink}>
+                                <span>Explore Expeditions</span>
+                                <span className={styles.arrow} aria-hidden="true">
+                  →
+                </span>
+                            </Link>
+                        </Rounded>
+
+                        <Rounded className={styles.btnGhost} backgroundColor="#f8f6f4">
+                            <Link href="#plan" className={styles.btnLink}>
+                                <span>Private Brief</span>
+                            </Link>
+                        </Rounded>
+                    </div>
+
+                    <div ref={scrollCueRef} className={styles.scrollCue} aria-hidden="true">
+                        <span>Scroll</span>
+                        <div className={styles.scrollTrack}>
+                            <div ref={scrollLineRef} className={styles.scrollLine} />
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
-        </div>
-      </section>
-  );
+        </section>
+    );
 }

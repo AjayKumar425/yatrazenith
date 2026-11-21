@@ -53,7 +53,7 @@
   max-width: 1380px;
   width: 100%;
   margin: 0 auto;
-  will-change: transform, opacity;
+  will-change: transform;
 }
 
 .meta {
@@ -122,49 +122,62 @@
   flex-wrap: wrap;
   align-items: center;
   gap: 1rem;
-}
 
-.btnPrimary,
-.btnGhost {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.55rem;
-  padding: 0.95rem 1.75rem;
-  border-radius: 999px;
-  font-size: 0.72rem;
-  letter-spacing: 0.18em;
-  text-transform: uppercase;
-  text-decoration: none;
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.3s ease;
-}
+  // Scoped under .buttons so specificity beats .roundedButton cleanly
+  .btnPrimary,
+  .btnGhost {
+    padding: 0;
+    border-radius: 999px;
+    transition: border-color 0.35s ease;
+  }
 
-.btnPrimary {
-  background: var(--color-white, #f8f6f4);
-  color: #1c130e;
-  font-weight: 600;
+  .btnPrimary {
+    background-color: var(--color-white, #f8f6f4);
+    --rounded-border: var(--color-white, #f8f6f4);
+    --rounded-color: #1c130e;
+    --rounded-hover-color: #1c130e;
 
-  &:hover {
-    background: var(--color-accent, #c49a6c);
+    .btnLink {
+      font-weight: 600;
+    }
 
-    .arrow {
-      transform: translateX(4px);
+    &:hover {
+      border-color: var(--color-accent, #c49a6c);
+
+      .arrow {
+        transform: translateX(4px);
+      }
+    }
+  }
+
+  .btnGhost {
+    background-color: transparent;
+    --rounded-border: rgba(248, 246, 244, 0.38);
+    --rounded-color: var(--color-white, #f8f6f4);
+    --rounded-hover-color: #1c130e;
+
+    &:hover {
+      border-color: var(--color-white, #f8f6f4);
     }
   }
 }
 
-.btnGhost {
-  border: 1px solid rgba(248, 246, 244, 0.38);
-  color: var(--color-white, #f8f6f4);
-
-  &:hover {
-    border-color: var(--color-accent, #c49a6c);
-    color: var(--color-accent, #c49a6c);
-  }
+.btnLink {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.55rem;
+  padding: 0.95rem 1.85rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  text-decoration: none;
+  white-space: nowrap;
 }
 
 .arrow {
   display: inline-block;
-  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+  transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .scrollCue {
