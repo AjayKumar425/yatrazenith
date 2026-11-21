@@ -1,22 +1,51 @@
-.preloader {
+.root {
   position: fixed;
   inset: 0;
   z-index: 2000;
-  background-color: #1c130e;
+  pointer-events: auto;
+}
+
+.veil {
+  position: absolute;
+  inset: 0;
+  background-color: #251b14;
+  border-bottom: 1px solid rgba(196, 154, 108, 0.45);
+  clip-path: inset(0% 0% 0% 0%);
+  will-change: clip-path;
+}
+
+.panel {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(
+          ellipse 80% 70% at 50% 45%,
+          #1d1510 0%,
+          #120d0a 100%
+  );
   color: var(--color-white, #f8f6f4);
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
   overflow: hidden;
 }
 
-.ambientGlow {
+// Subtle editorial film grain so the dark surface never looks flat
+.grain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  opacity: 0.045;
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 180px 180px;
+}
+
+.glow {
   position: absolute;
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
           circle at 50% 48%,
-          rgba(196, 154, 108, 0.08) 0%,
-          rgba(28, 19, 14, 0) 62%
+          rgba(196, 154, 108, 0.09) 0%,
+          rgba(196, 154, 108, 0) 56%
   );
 }
 
@@ -24,11 +53,20 @@
   position: relative;
   z-index: 1;
   height: 100%;
+  max-width: 1460px;
+  margin: 0 auto;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: clamp(1.5rem, 4vw, 3rem);
+  padding: clamp(1.35rem, 3.2vw, 2.5rem) clamp(1.25rem, 4vw, 3.5rem);
   will-change: transform;
+}
+
+.topSection,
+.bottomSection {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
 }
 
 .metaBar {
@@ -36,12 +74,38 @@
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
-  font-size: 0.6875rem;
-  letter-spacing: 0.22em;
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
   text-transform: uppercase;
-  color: rgba(248, 246, 244, 0.56);
+  color: rgba(248, 246, 244, 0.54);
   opacity: 0;
   visibility: hidden;
+}
+
+.centerMeta {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.55rem;
+  color: rgba(248, 246, 244, 0.72);
+
+  @media (max-width: 720px) {
+    display: none;
+  }
+}
+
+.dot {
+  width: 5px;
+  height: 5px;
+  border-radius: 50%;
+  background: var(--color-accent, #c49a6c);
+}
+
+.rule {
+  width: 100%;
+  height: 1px;
+  background: rgba(248, 246, 244, 0.1);
+  transform-origin: left center;
+  will-change: transform;
 }
 
 .center {
@@ -49,22 +113,64 @@
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 0.95rem;
+  gap: 0.85rem;
+  padding: 1rem 0;
 }
 
-.logoWrap {
+// Toned wax-seal medallion with orbital drawing ring
+.crest {
+  position: relative;
+  width: 76px;
+  height: 76px;
+  display: grid;
+  place-items: center;
+  margin-bottom: 0.35rem;
   opacity: 0;
   visibility: hidden;
-  will-change: transform, opacity;
+  will-change: transform;
+}
+
+.crestRing {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  transform: rotate(-90deg);
+}
+
+.ringTrack {
+  fill: none;
+  stroke: rgba(248, 246, 244, 0.12);
+  stroke-width: 1;
+}
+
+.ringProgress {
+  fill: none;
+  stroke: var(--color-accent, #c49a6c);
+  stroke-width: 1.2;
+}
+
+.medallion {
+  width: 54px;
+  height: 54px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #ede6dc;
+  display: grid;
+  place-items: center;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
 }
 
 .logo {
+  width: 100%;
+  height: 100%;
   object-fit: contain;
-  opacity: 0.92;
+  // Softens stark pure-white PNG background into warm limestone
+  filter: brightness(0.92) sepia(0.1) contrast(1.04);
 }
 
 .subtitle {
-  font-size: 0.6875rem;
+  font-size: 0.68rem;
   letter-spacing: 0.34em;
   text-transform: uppercase;
   color: var(--color-accent, #c49a6c);
@@ -74,50 +180,112 @@
 
 .title {
   font-family: var(--font-serif-family, "Cormorant Garamond", serif);
-  font-size: clamp(2.15rem, 5.2vw, 3.85rem);
+  font-size: clamp(2.85rem, 7.2vw, 6.2rem);
   font-weight: 300;
-  letter-spacing: 0.14em;
+  letter-spacing: -0.02em;
+  line-height: 1.02;
+  color: var(--color-white, #f8f6f4);
+  opacity: 0;
+  visibility: hidden;
+
+  em {
+    font-style: italic;
+    color: var(--color-light, #e6ddd2);
+    padding-right: 0.08em;
+  }
+}
+
+.splitLine {
+  padding-bottom: 0.08em;
+  margin-bottom: -0.08em;
+  will-change: transform;
+}
+
+.caption {
+  font-size: 0.68rem;
+  letter-spacing: 0.28em;
   text-transform: uppercase;
-  line-height: 1.08;
+  color: rgba(248, 246, 244, 0.44);
+  margin-top: 0.15rem;
   opacity: 0;
   visibility: hidden;
 }
 
 .barTrack {
-  width: min(300px, 68vw);
+  width: 100%;
   height: 1px;
-  background: rgba(248, 246, 244, 0.16);
+  background: rgba(248, 246, 244, 0.12);
   overflow: hidden;
-  margin-top: 0.65rem;
+  transform-origin: left center;
 }
 
 .barFill {
   width: 100%;
   height: 100%;
-  background: var(--color-accent, #c49a6c);
+  background: linear-gradient(
+          90deg,
+          rgba(196, 154, 108, 0.5) 0%,
+          var(--color-accent, #c49a6c) 100%
+  );
   transform: scaleX(0);
   transform-origin: left center;
   will-change: transform;
 }
 
+.bottomMeta {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-end;
+  gap: 1.5rem;
+  opacity: 0;
+  visibility: hidden;
+}
+
+.bottomLeft {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+
+.label {
+  font-size: 0.66rem;
+  letter-spacing: 0.24em;
+  text-transform: uppercase;
+  color: rgba(248, 246, 244, 0.54);
+}
+
+.altitude {
+  font-size: 0.7rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: rgba(248, 246, 244, 0.38);
+
+  strong {
+    font-weight: 400;
+    color: var(--color-accent, #c49a6c);
+    font-variant-numeric: tabular-nums;
+  }
+}
+
 .counterWrap {
   display: inline-flex;
-  align-items: baseline;
-  gap: 0.18rem;
+  align-items: flex-start;
+  gap: 0.2rem;
+  line-height: 0.85;
 }
 
 .counter {
   font-family: var(--font-serif-family, "Cormorant Garamond", serif);
-  font-size: clamp(2rem, 4vw, 3rem);
+  font-size: clamp(2.8rem, 6vw, 5.2rem);
   font-weight: 300;
-  line-height: 1;
-  letter-spacing: 0.04em;
+  letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
   color: var(--color-white, #f8f6f4);
 }
 
 .counterUnit {
-  font-size: 0.72rem;
+  font-size: 0.8rem;
   letter-spacing: 0.1em;
+  margin-top: 0.35rem;
   color: var(--color-accent, #c49a6c);
 }

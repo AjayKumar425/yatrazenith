@@ -36,12 +36,15 @@ export default function Landing() {
             let revealTl: gsap.core.Timeline | null = null;
             let scrollPulseTl: gsap.core.Timeline | null = null;
 
+            // 1. Multi-layer scrubbed parallax
             const mm = gsap.matchMedia();
 
             mm.add(
                 {
-                    isDesktop: "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
-                    isMobile: "(max-width: 900px) and (prefers-reduced-motion: no-preference)",
+                    isDesktop:
+                        "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
+                    isMobile:
+                        "(max-width: 900px) and (prefers-reduced-motion: no-preference)",
                 },
                 (context) => {
                     const { isDesktop } = context.conditions ?? {};
@@ -64,7 +67,7 @@ export default function Landing() {
 
                     gsap.to(innerRef.current, {
                         yPercent: isDesktop ? -10 : -5,
-                        opacity: 0.2,
+                        opacity: 0.18,
                         ease: "none",
                         scrollTrigger: {
                             trigger: hero,
@@ -76,13 +79,13 @@ export default function Landing() {
 
                     if (scrollCueRef.current) {
                         gsap.to(scrollCueRef.current, {
-                            y: -18,
+                            y: -16,
                             autoAlpha: 0,
                             ease: "none",
                             scrollTrigger: {
                                 trigger: hero,
                                 start: "top top",
-                                end: "22% top",
+                                end: "20% top",
                                 scrub: true,
                             },
                         });
@@ -90,6 +93,7 @@ export default function Landing() {
                 }
             );
 
+            // 2. Initial states
             const prefersReducedMotion = window.matchMedia(
                 "(prefers-reduced-motion: reduce)"
             ).matches;
@@ -109,7 +113,7 @@ export default function Landing() {
                 return () => mm.revert();
             }
 
-            gsap.set(videoRef.current, { scale: 1.14 });
+            gsap.set(videoRef.current, { scale: 1.12 });
             gsap.set(
                 [
                     metaRef.current,
@@ -122,6 +126,7 @@ export default function Landing() {
             );
             gsap.set(dividerRef.current, { scaleX: 0, transformOrigin: "left center" });
 
+            // 3. Synchronized SplitText & cinema reveal
             const playReveal = () => {
                 if (isCancelled || hasPlayed || !titleRef.current || !leadRef.current) {
                     return;
@@ -149,27 +154,27 @@ export default function Landing() {
                         videoRef.current,
                         {
                             scale: 1,
-                            duration: 1.85,
+                            duration: 1.9,
                             ease: "power3.out",
                         },
                         0
                     )
                     .fromTo(
                         metaRef.current,
-                        { y: 18, autoAlpha: 0 },
+                        { y: 16, autoAlpha: 0 },
                         { y: 0, autoAlpha: 1, duration: 1.0 },
-                        0.15
+                        0.18
                     )
                     .fromTo(
                         titleSplit.lines,
-                        { yPercent: 112, rotate: 1.2 },
+                        { yPercent: 112, rotate: 1.1 },
                         {
                             yPercent: 0,
                             rotate: 0,
-                            duration: 1.3,
+                            duration: 1.35,
                             stagger: 0.11,
                         },
-                        0.2
+                        0.22
                     )
                     .to(
                         dividerRef.current,
@@ -178,7 +183,7 @@ export default function Landing() {
                             duration: 1.15,
                             ease: "expo.inOut",
                         },
-                        0.38
+                        0.4
                     )
                     .fromTo(
                         leadSplit.lines,
@@ -188,35 +193,35 @@ export default function Landing() {
                             duration: 1.05,
                             stagger: 0.06,
                         },
-                        0.48
+                        0.5
                     )
                     .fromTo(
                         buttonsRef.current,
-                        { y: 22, autoAlpha: 0 },
+                        { y: 20, autoAlpha: 0 },
                         { y: 0, autoAlpha: 1, duration: 1.0 },
                         0.58
                     )
                     .fromTo(
                         scrollCueRef.current,
-                        { y: 14, autoAlpha: 0 },
+                        { y: 12, autoAlpha: 0 },
                         { y: 0, autoAlpha: 1, duration: 0.9 },
-                        0.72
+                        0.7
                     );
 
                 if (scrollLineRef.current) {
-                    scrollPulseTl = gsap.timeline({ repeat: -1, delay: 1.2 });
+                    scrollPulseTl = gsap.timeline({ repeat: -1, delay: 1.1 });
                     scrollPulseTl
                         .fromTo(
                             scrollLineRef.current,
                             { scaleY: 0, transformOrigin: "top center" },
-                            { scaleY: 1, duration: 1.0, ease: "expo.inOut" }
+                            { scaleY: 1, duration: 0.95, ease: "expo.inOut" }
                         )
                         .to(scrollLineRef.current, {
                             scaleY: 0,
                             transformOrigin: "bottom center",
-                            duration: 1.0,
+                            duration: 0.95,
                             ease: "expo.inOut",
-                            delay: 0.25,
+                            delay: 0.35,
                         });
                 }
             };
@@ -233,7 +238,7 @@ export default function Landing() {
                 window.addEventListener("preloader-exit", triggerWhenFontsReady, {
                     once: true,
                 });
-                fallbackTimer = window.setTimeout(triggerWhenFontsReady, 2600);
+                fallbackTimer = window.setTimeout(triggerWhenFontsReady, 2800);
             }
 
             return () => {
@@ -271,7 +276,10 @@ export default function Landing() {
 
             <div ref={innerRef} className={styles.inner}>
                 <div ref={metaRef} className={styles.meta}>
-                    <span>Expeditions &amp; Retreat — Himalayas</span>
+          <span className={styles.metaItem}>
+            <span className={styles.metaDot} aria-hidden="true" />
+            Expeditions &amp; Retreat — Himalayas
+          </span>
                     <span>Private Travel Atelier · Uttarakhand</span>
                 </div>
 
@@ -283,9 +291,9 @@ export default function Landing() {
 
                 <div className={styles.bottom}>
                     <p ref={leadRef} className={styles.lead}>
-                        Find the spirit of the Himalayas through privately curated expeditions,
-                        architectural mountain sanctuaries, and unhurried passage across India&apos;s
-                        highest valleys.
+                        Find the spirit of the Himalayas through privately curated
+                        expeditions, architectural mountain sanctuaries, and unhurried
+                        passage across India&apos;s highest valleys.
                     </p>
 
                     <div ref={buttonsRef} className={styles.buttons}>
