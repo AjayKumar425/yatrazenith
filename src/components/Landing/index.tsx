@@ -1,352 +1,328 @@
 "use client";
 
-import { useEffect, useRef, useCallback } from "react";
-import Image from "next/image";
+import { useRef } from "react";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
 import styles from "./style.module.scss";
 
-gsap.registerPlugin(useGSAP, SplitText);
+gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
 
 export default function Landing() {
-  const containerRef = useRef<HTMLElement>(null);
-  const landingPageRef = useRef<HTMLDivElement>(null);
-  const backgroundMediaRef = useRef<HTMLDivElement>(null);
+  const heroRef = useRef<HTMLElement>(null);
+  const mediaInnerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
-
-  const preloaderRef = useRef<HTMLDivElement>(null);
-  const preloaderScreenRef = useRef<HTMLDivElement>(null);
-  const preloaderLogoRef = useRef<HTMLDivElement>(null);
-
-  const heroContentRef = useRef<HTMLDivElement>(null);
-  const heroEyebrowRef = useRef<HTMLParagraphElement>(null);
-  const heroTitleRef = useRef<HTMLHeadingElement>(null);
-
-  const timelineRef = useRef<gsap.core.Timeline | null>(null);
-  const splitsRef = useRef<SplitText[]>([]);
-
-  const getClipCoordinates = useCallback(() => {
-    if (typeof window === "undefined") {
-      return {
-        initialClip: "polygon(38% 42%, 62% 42%, 62% 100%, 38% 100%)",
-        logoTop: "26%",
-      };
-    }
-    const width = window.innerWidth;
-    let offset = 12; 
-    let offsetTop = "42%";
-    let logoTop = "26%";
-
-    if (width < 1024) {
-      offset = 18; 
-      offsetTop = "44%";
-      logoTop = "28%";
-    }
-    if (width < 768) {
-      offset = 27; 
-      offsetTop = "42%";
-      logoTop = "26%";
-    }
-    if (width < 480) {
-      offset = 35; 
-      offsetTop = "40%";
-      logoTop = "24%";
-    }
-
-    const offsetPositive = `${50 - offset}%`;
-    const offsetNegative = `${50 + offset}%`;
-
-    return {
-      initialClip: `polygon(${offsetPositive} ${offsetTop}, ${offsetNegative} ${offsetTop}, ${offsetNegative} 100%, ${offsetPositive} 100%)`,
-      logoTop,
-    };
-  }, []);
-
-  // Ensure video plays smoothly
-  useEffect(() => {
-    if (videoRef.current) {
-      videoRef.current.muted = true;
-      videoRef.current.play().catch(() => {
-        // Autoplay handled safely
-      });
-    }
-  }, []);
-
-  // Cleanup SplitText instances
-  const cleanupSplits = useCallback(() => {
-    splitsRef.current.forEach((split) => {
-      try {
-        split.revert();
-      } catch {
-        // Safe cleanup
-      }
-    });
-    splitsRef.current = [];
-  }, []);
-
-  // The Signature Mask Reveal Animation with GSAP SplitText
-  const runRevealAnimation = useCallback(() => {
-    if (
-      !landingPageRef.current ||
-      !preloaderLogoRef.current ||
-      !preloaderScreenRef.current ||
-      !heroTitleRef.current ||
-      !heroEyebrowRef.current
-    ) {
-      return;
-    }
-
-    const { initialClip, logoTop } = getClipCoordinates();
-
-    if (timelineRef.current) {
-      timelineRef.current.kill();
-    }
-
-    cleanupSplits();
-
-    // Initial Preloader State
-    gsap.set(preloaderRef.current, { display: "block", autoAlpha: 1 });
-    gsap.set(preloaderScreenRef.current, { autoAlpha: 1 });
-    gsap.set(preloaderLogoRef.current, {
-      top: "50%",
-      left: "50%",
-      opacity: 1,
-      yPercent: -50,
-      xPercent: -50,
-      scale: 1,
-    });
-
-    // video section
-    gsap.set(landingPageRef.current, {
-      clipPath: initialClip,
-      y: "100%",
-    });
-    gsap.set(backgroundMediaRef.current, {
-      scale: 1.15,
-    });
-
-    // GSAP SplitText
-    const eyebrowParent = new SplitText(heroEyebrowRef.current, {
-      type: "lines",
-      linesClass: styles.lineMask,
-    });
-    const eyebrowChild = new SplitText(eyebrowParent.lines, {
-      type: "lines",
-      linesClass: styles.lineInner,
-    });
-
-    const titleParent = new SplitText(heroTitleRef.current, {
-      type: "lines",
-      linesClass: styles.lineMask,
-    });
-    const titleChild = new SplitText(titleParent.lines, {
-      type: "lines",
-      linesClass: styles.lineInner,
-    });
-
-    splitsRef.current = [eyebrowParent, eyebrowChild, titleParent, titleChild];
-
-    // Initial state of text inside their line masks
-    gsap.set([eyebrowChild.lines, titleChild.lines], {
-      yPercent: 120,
-      opacity: 0,
-    });
-
-    // Temporarily lock scroll during preloader reveal
-    if (typeof document !== "undefined") {
-      document.body.style.overflow = "hidden";
-      window.scrollTo(0, 0);
-    }
-
-    const tl = gsap.timeline({
-      defaults: { ease: "expo.inOut" },
-      onComplete: () => {
-        if (landingPageRef.current) {
-          gsap.set(landingPageRef.current, {
-            clipPath: "none",
-            clearProps: "y,transform",
-          });
-        }
-        if (preloaderRef.current) {
-          gsap.set(preloaderRef.current, { display: "none" });
-        }
-        if (typeof document !== "undefined") {
-          document.body.style.overflow = "";
-        }
-      },
-    });
-
-    timelineRef.current = tl;
-
-    tl.to(
-      landingPageRef.current,
-      {
-        y: "0%",
-        duration: 1.85,
-        ease: "expo.inOut",
-      },
-      0
-    );
-``
-    tl.to(
-      preloaderLogoRef.current,
-      {
-        top: logoTop,
-        duration: 1.85,
-        ease: "expo.inOut",
-      },
-      0
-    );
-
-    // Mask
-    tl.to(
-      landingPageRef.current,
-      {
-        clipPath: "polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)",
-        duration: 2.0,
-        ease: "expo.inOut",
-      },
-      1.75
-    );
-
-    // Parallax
-    tl.to(
-      backgroundMediaRef.current,
-      {
-        scale: 1.0,
-        duration: 2.0,
-        ease: "expo.inOut",
-      },
-      1.75
-    );
-
-    // Logo Move
-    tl.to(
-      preloaderLogoRef.current,
-      {
-        top: "6%",
-        opacity: 0,
-        scale: 0.95,
-        duration: 1.0,
-        ease: "expo.inOut",
-      },
-      1.75
-    );
-
-    // Video Fill/Mask
-    tl.to(
-      preloaderScreenRef.current,
-      {
-        autoAlpha: 0,
-        duration: 0.8,
-        ease: "power2.out",
-      },
-      2.6
-    );
-
-    tl.call(() => {
-      window.dispatchEvent(new CustomEvent("reveal-header"));
-    }, undefined, 2.15);
-
-    tl.to(
-      eyebrowChild.lines,
-      {
-        yPercent: 0,
-        opacity: 1,
-        duration: 1.4,
-        ease: "expo.out",
-      },
-      2.3
-    );
-
-    tl.to(
-      titleChild.lines,
-      {
-        yPercent: 0,
-        opacity: 1,
-        duration: 1.6,
-        stagger: 0.12,
-        ease: "expo.out",
-      },
-      2.4
-    );
-  }, [getClipCoordinates, cleanupSplits]);
-
-  // Clean up overflow on unmount
-  useEffect(() => {
-    return () => {
-      if (typeof document !== "undefined") {
-        document.body.style.overflow = "";
-      }
-    };
-  }, []);
+  const innerRef = useRef<HTMLDivElement>(null);
+  const metaRef = useRef<HTMLDivElement>(null);
+  const titleRef = useRef<HTMLHeadingElement>(null);
+  const dividerRef = useRef<HTMLDivElement>(null);
+  const leadRef = useRef<HTMLParagraphElement>(null);
+  const buttonsRef = useRef<HTMLDivElement>(null);
+  const scrollCueRef = useRef<HTMLDivElement>(null);
+  const scrollLineRef = useRef<HTMLDivElement>(null);
 
   useGSAP(
-    () => {
-      if (typeof document !== "undefined" && document.fonts) {
-        document.fonts.ready.then(() => {
-          runRevealAnimation();
-        });
-      } else {
-        runRevealAnimation();
-      }
-    },
-    { scope: containerRef }
+      () => {
+        const hero = heroRef.current;
+        if (!hero) return;
+
+        let isCancelled = false;
+        let hasPlayed = false;
+        let titleSplit: SplitText | null = null;
+        let leadSplit: SplitText | null = null;
+        let revealTl: gsap.core.Timeline | null = null;
+        let scrollPulseTl: gsap.core.Timeline | null = null;
+
+        // 1. Scroll-driven multi-layer parallax (isolated from intro tweens)
+        const mm = gsap.matchMedia();
+
+        mm.add(
+            {
+              isDesktop: "(min-width: 901px) and (prefers-reduced-motion: no-preference)",
+              isMobile: "(max-width: 900px) and (prefers-reduced-motion: no-preference)",
+            },
+            (context) => {
+              const { isDesktop } = context.conditions ?? {};
+
+              // Background video depth shift (mediaInner is 128% tall so zero edge gaps)
+              gsap.fromTo(
+                  mediaInnerRef.current,
+                  { yPercent: 0, scale: 1 },
+                  {
+                    yPercent: isDesktop ? 10 : 6,
+                    scale: isDesktop ? 1.05 : 1.03,
+                    ease: "none",
+                    scrollTrigger: {
+                      trigger: hero,
+                      start: "top top",
+                      end: "bottom top",
+                      scrub: true,
+                    },
+                  }
+              );
+
+              // Foreground editorial block counter-lift & soft fade
+              gsap.to(innerRef.current, {
+                yPercent: isDesktop ? -10 : -5,
+                opacity: 0.2,
+                ease: "none",
+                scrollTrigger: {
+                  trigger: hero,
+                  start: "top top",
+                  end: "bottom top",
+                  scrub: true,
+                },
+              });
+
+              // Early exit for the scroll cue
+              if (scrollCueRef.current) {
+                gsap.to(scrollCueRef.current, {
+                  y: -18,
+                  autoAlpha: 0,
+                  ease: "none",
+                  scrollTrigger: {
+                    trigger: hero,
+                    start: "top top",
+                    end: "22% top",
+                    scrub: true,
+                  },
+                });
+              }
+            }
+        );
+
+        // 2. Initial hidden state for intro choreography
+        const prefersReducedMotion = window.matchMedia(
+            "(prefers-reduced-motion: reduce)"
+        ).matches;
+
+        if (prefersReducedMotion) {
+          gsap.set(
+              [
+                metaRef.current,
+                titleRef.current,
+                leadRef.current,
+                buttonsRef.current,
+                scrollCueRef.current,
+              ],
+              { autoAlpha: 1 }
+          );
+          gsap.set(dividerRef.current, { scaleX: 1 });
+          return () => mm.revert();
+        }
+
+        gsap.set(videoRef.current, { scale: 1.14 });
+        gsap.set(
+            [
+              metaRef.current,
+              titleRef.current,
+              leadRef.current,
+              buttonsRef.current,
+              scrollCueRef.current,
+            ],
+            { autoAlpha: 0 }
+        );
+        gsap.set(dividerRef.current, { scaleX: 0, transformOrigin: "left center" });
+
+        // 3. Font-safe SplitText setup & synchronized reveal
+        const playReveal = () => {
+          if (isCancelled || hasPlayed || !titleRef.current || !leadRef.current) {
+            return;
+          }
+          hasPlayed = true;
+
+          titleSplit = SplitText.create(titleRef.current, {
+            type: "lines,words",
+            mask: "lines",
+            linesClass: styles.splitLine,
+          });
+
+          leadSplit = SplitText.create(leadRef.current, {
+            type: "lines",
+            mask: "lines",
+            linesClass: styles.splitLine,
+          });
+
+          gsap.set([titleRef.current, leadRef.current], { autoAlpha: 1 });
+
+          revealTl = gsap.timeline({ defaults: { ease: "expo.out" } });
+
+          revealTl
+              // Cinema settle on the hero video as the preloader curtain rises
+              .to(
+                  videoRef.current,
+                  {
+                    scale: 1,
+                    duration: 1.85,
+                    ease: "power3.out",
+                  },
+                  0
+              )
+              // Top editorial metadata
+              .fromTo(
+                  metaRef.current,
+                  { y: 18, autoAlpha: 0 },
+                  { y: 0, autoAlpha: 1, duration: 1.0 },
+                  0.15
+              )
+              // Masked line reveal on display headline
+              .fromTo(
+                  titleSplit.lines,
+                  { yPercent: 112, rotate: 1.2 },
+                  {
+                    yPercent: 0,
+                    rotate: 0,
+                    duration: 1.3,
+                    stagger: 0.11,
+                  },
+                  0.2
+              )
+              // Hairline rule draw
+              .to(
+                  dividerRef.current,
+                  {
+                    scaleX: 1,
+                    duration: 1.15,
+                    ease: "expo.inOut",
+                  },
+                  0.38
+              )
+              // Masked line reveal on lead copy
+              .fromTo(
+                  leadSplit.lines,
+                  { yPercent: 110 },
+                  {
+                    yPercent: 0,
+                    duration: 1.05,
+                    stagger: 0.06,
+                  },
+                  0.48
+              )
+              // CTA buttons & scroll cue
+              .fromTo(
+                  buttonsRef.current,
+                  { y: 22, autoAlpha: 0 },
+                  { y: 0, autoAlpha: 1, duration: 1.0 },
+                  0.58
+              )
+              .fromTo(
+                  scrollCueRef.current,
+                  { y: 14, autoAlpha: 0 },
+                  { y: 0, autoAlpha: 1, duration: 0.9 },
+                  0.72
+              );
+
+          // Ambient editorial loop on scroll indicator line
+          if (scrollLineRef.current) {
+            scrollPulseTl = gsap.timeline({ repeat: -1, delay: 1.2 });
+            scrollPulseTl
+                .fromTo(
+                    scrollLineRef.current,
+                    { scaleY: 0, transformOrigin: "top center" },
+                    { scaleY: 1, duration: 1.0, ease: "expo.inOut" }
+                )
+                .to(scrollLineRef.current, {
+                  scaleY: 0,
+                  transformOrigin: "bottom center",
+                  duration: 1.0,
+                  ease: "expo.inOut",
+                  delay: 0.25,
+                });
+          }
+        };
+
+        const triggerWhenFontsReady = () => {
+          document.fonts.ready.then(playReveal);
+        };
+
+        // Listen for Preloader exit; play immediately if already completed (e.g., route return)
+        let fallbackTimer: number | undefined;
+
+        if (window.__yatraPreloaderDone) {
+          triggerWhenFontsReady();
+        } else {
+          window.addEventListener("preloader-exit", triggerWhenFontsReady, {
+            once: true,
+          });
+          // Safety fallback in case Landing is rendered without Preloader
+          fallbackTimer = window.setTimeout(triggerWhenFontsReady, 2600);
+        }
+
+        return () => {
+          isCancelled = true;
+          if (fallbackTimer) window.clearTimeout(fallbackTimer);
+          window.removeEventListener("preloader-exit", triggerWhenFontsReady);
+          revealTl?.kill();
+          scrollPulseTl?.kill();
+          titleSplit?.revert();
+          leadSplit?.revert();
+          mm.revert();
+        };
+      },
+      { scope: heroRef }
   );
 
   return (
-    <section className={styles.landing} ref={containerRef}>
-      <div className={styles.preloader} ref={preloaderRef}>
-        <div className={styles.preloaderScreen} ref={preloaderScreenRef} />
-        <div className={styles.preloaderLogo} ref={preloaderLogoRef}>
-          <div className={styles.preloaderLogoInner}>
-            <Image
-              src="/images/logo.png"
-              alt="Yatra Zenith"
-              width={104}
-              height={104}
-              priority
-              className={styles.logoImage}
+      <section ref={heroRef} id="top" className={styles.hero}>
+        <div className={styles.media} aria-hidden="true">
+          <div ref={mediaInnerRef} className={styles.mediaInner}>
+            <video
+                ref={videoRef}
+                src="/video/intro.mp4"
+                autoPlay
+                loop
+                muted
+                playsInline
+                preload="auto"
+                className={styles.video}
             />
-            <div className={styles.wordmark}>
-              <span className={styles.wordmarkThe}>The</span>
-              <h2 className={styles.wordmarkTitle}>Yatra Zenith</h2>
+          </div>
+        </div>
+
+        <div className={styles.vignette} aria-hidden="true" />
+
+        <div ref={innerRef} className={styles.inner}>
+          <div ref={metaRef} className={styles.meta}>
+            <span>Expeditions &amp; Retreat — Himalayas</span>
+            <span>Private Travel Atelier · Uttarakhand</span>
+          </div>
+
+          <h1 ref={titleRef} className={styles.title}>
+            Journeys Above <em>the Ordinary</em>
+          </h1>
+
+          <div ref={dividerRef} className={styles.divider} aria-hidden="true" />
+
+          <div className={styles.bottom}>
+            <p ref={leadRef} className={styles.lead}>
+              Find the spirit of the Himalayas through privately curated expeditions,
+              architectural mountain sanctuaries, and unhurried passage across India&apos;s
+              highest valleys.
+            </p>
+
+            {/* Ready to wrap with Magnetic / Rounded button components */}
+            <div ref={buttonsRef} className={styles.buttons}>
+              <Link href="#expeditions" className={styles.btnPrimary}>
+                <span>Explore Expeditions</span>
+                <span className={styles.arrow} aria-hidden="true">
+                →
+              </span>
+              </Link>
+              <Link href="#plan" className={styles.btnGhost}>
+                <span>Private Brief</span>
+              </Link>
+            </div>
+
+            <div ref={scrollCueRef} className={styles.scrollCue} aria-hidden="true">
+              <span>Scroll</span>
+              <div className={styles.scrollTrack}>
+                <div ref={scrollLineRef} className={styles.scrollLine} />
+              </div>
             </div>
           </div>
         </div>
-      </div>
-
-      <div className={styles.landingPage} ref={landingPageRef}>
-        <div className={styles.backgroundMedia} ref={backgroundMediaRef}>
-          <video
-            ref={videoRef}
-            src="/video/intro.mp4"
-            autoPlay
-            loop
-            muted
-            playsInline
-            preload="auto"
-            className={styles.video}
-          />
-          <div className={styles.overlayGradient} />
-          <div className={styles.overlayVignette} />
-        </div>
-
-        <div className={styles.heroContainer}>
-          <div className={styles.heroContent} ref={heroContentRef}>
-            <p className={styles.heroEyebrow} ref={heroEyebrowRef}>
-              Expeditions & Retreat — Himalayas
-            </p>
-
-            <h1 className={styles.heroTitle} ref={heroTitleRef}>
-              Find the spirit of the Himalayas
-              <br />
-              at Yatra Zenith
-            </h1>
-          </div>
-        </div>
-      </div>
-    </section>
+      </section>
   );
 }

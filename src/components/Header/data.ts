@@ -1,41 +1,17 @@
-export interface NavLinkItem {
-  title: string;
-  href: string;
-}
-
-export const navLinks: NavLinkItem[] = [
-  { title: "Home", href: "/" },
-  { title: "Experiences", href: "/experiences" },
-  { title: "The Journal", href: "/journal" },
-  { title: "Our Philosophy", href: "/philosophy" },
-  { title: "Gallery", href: "/gallery" },
+export const navLinks = [
+  { num: "01", label: "Sanctuary", href: "#top" },
+  { num: "02", label: "Philosophy", href: "#philosophy" },
+  { num: "03", label: "Expeditions", href: "#expeditions" },
+  { num: "04", label: "Plan Journey", href: "#plan" },
+  { num: "05", label: "Contact", href: "/contact" },
 ];
 
-export interface ContactItem {
-  label: string;
-  value: string;
-  href: string;
-}
-
-export const contactLinks: ContactItem[] = [
-  {
-    label: "WhatsApp",
-    value: "+91 98765 43210",
-    href: "https://wa.me/919876543210",
-  },
-  {
-    label: "Email",
-    value: "hello@yatrazenith.com",
-    href: "mailto:hello@yatrazenith.com",
-  },
+export const contactLinks = [
+  { label: "concierge@yatrazenith.com", href: "mailto:concierge@yatrazenith.com" },
+  { label: "Dehradun & Leh Atelier", href: "#footer" },
 ];
 
-export interface SocialItem {
-  label: string;
-  href: string;
-}
-
-export const socialLinks: SocialItem[] = [
-  { label: "Instagram", href: "https://instagram.com/yatrazenith" },
-  { label: "Facebook", href: "https://facebook.com/yatrazenith" },
+export const socialLinks = [
+  { label: "Instagram", href: "https://instagram.com" },
+  { label: "Journal", href: "#footer" },
 ];

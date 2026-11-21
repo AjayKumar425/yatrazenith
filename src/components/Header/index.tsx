@@ -1,349 +1,124 @@
 "use client";
 
-import { useEffect, useRef, useState, useCallback } from "react";
-import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
 import gsap from "gsap";
-import { useGSAP } from "@gsap/react";
-import { SplitText } from "gsap/SplitText";
-import styles from "./style.module.scss";
 import { navLinks, contactLinks, socialLinks } from "./data";
-
-gsap.registerPlugin(useGSAP, SplitText);
+import styles from "./style.module.scss";
 
 export default function Header() {
-  const headerRef = useRef<HTMLElement>(null);
-  const topBarRef = useRef<HTMLDivElement>(null);
-  const overlayRef = useRef<HTMLDivElement>(null);
-  const navListRef = useRef<HTMLUListElement>(null);
-  const footerLeftRef = useRef<HTMLDivElement>(null);
-  const footerRightRef = useRef<HTMLDivElement>(null);
-
   const [isOpen, setIsOpen] = useState(false);
-  const [hasRevealed, setHasRevealed] = useState(false);
   const [isScrolled, setIsScrolled] = useState(false);
+  const [hasRevealed, setHasRevealed] = useState(false);
+  const [istTime, setIstTime] = useState("");
+  const overlayRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    const handleScroll = () => {
-      const heroHeight = window.innerHeight;
-      setIsScrolled(window.scrollY > heroHeight - 90);
+    const onReveal = () => setHasRevealed(true);
+    window.addEventListener("reveal-header", onReveal);
+    const fallback = window.setTimeout(() => setHasRevealed(true), 2200);
+
+    const onScroll = () => setIsScrolled(window.scrollY > window.innerHeight * 0.72);
+    window.addEventListener("scroll", onScroll, { passive: true });
+
+    const onKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") setIsOpen(false);
     };
+    window.addEventListener("keydown", onKeyDown);
 
-    window.addEventListener("scroll", handleScroll, { passive: true });
-    handleScroll();
-
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  const isDark = isOpen || isScrolled;
-
-  const barSplitsRef = useRef<SplitText[]>([]);
-  const navSplitsRef = useRef<SplitText[]>([]);
-  const openTimelineRef = useRef<gsap.core.Timeline | null>(null);
-
-  // ---- Cleanup helpers ----
-  const cleanupSplits = useCallback((ref: React.RefObject<SplitText[]>) => {
-    ref.current.forEach((s) => {
-      try { s.revert(); } catch { /* safe */ }
-    });
-    ref.current = [];
-  }, []);
-
-  // ---- Initial reveal (triggered by landing page "reveal-header" event) ----
-  const revealHeader = useCallback(() => {
-    if (hasRevealed || !headerRef.current) return;
-    setHasRevealed(true);
-
-    cleanupSplits(barSplitsRef);
-
-    // Split the top bar text elements
-    const textTargets = headerRef.current.querySelectorAll<HTMLElement>(
-      `.${styles.brandTitle}, .${styles.brandSub}, .${styles.menuLabel}, .${styles.ctaPill}`
-    );
-
-    const parentSplits: SplitText[] = [];
-    const childSplits: SplitText[] = [];
-
-    textTargets.forEach((target) => {
-      const parent = new SplitText(target, {
-        type: "lines",
-        linesClass: styles.lineMask,
-      });
-      const child = new SplitText(parent.lines, {
-        type: "lines",
-        linesClass: styles.lineInner,
-      });
-      parentSplits.push(parent);
-      childSplits.push(child);
-    });
-
-    barSplitsRef.current = [...parentSplits, ...childSplits];
-    const innerLines = childSplits.flatMap((c) => c.lines);
-
-    // Set initial states
-    gsap.set(headerRef.current, { opacity: 1 });
-    gsap.set(innerLines, { yPercent: 120, opacity: 0 });
-
-    const logoImg = headerRef.current.querySelector(`.${styles.logoImg}`);
-    const hamburgerIcon = headerRef.current.querySelector(`.${styles.hamburgerIcon}`);
-    const ctaPill = headerRef.current.querySelector(`.${styles.ctaPill}`);
-
-    gsap.set([logoImg, hamburgerIcon, ctaPill].filter(Boolean), { opacity: 0, y: -8 });
-
-    // Animate in
-    const tl = gsap.timeline({ defaults: { ease: "expo.out" } });
-
-    tl.to(
-      [hamburgerIcon, logoImg, ctaPill].filter(Boolean),
-      { opacity: 1, y: 0, duration: 1.2, stagger: 0.08 },
-      0
-    );
-
-    tl.to(
-      innerLines,
-      { yPercent: 0, opacity: 1, duration: 1.4, stagger: 0.04 },
-      0.1
-    );
-  }, [hasRevealed, cleanupSplits]);
-
-  // Listen for the reveal event
-  useEffect(() => {
-    const handleReveal = () => revealHeader();
-    window.addEventListener("reveal-header", handleReveal);
-
-    // Fallback timeout
-    const timer = setTimeout(() => revealHeader(), 2400);
+    const updateTime = () => {
+      setIstTime(
+        new Intl.DateTimeFormat("en-IN", {
+          timeZone: "Asia/Kolkata",
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: true,
+        }).format(new Date())
+      );
+    };
+    updateTime();
+    const clock = window.setInterval(updateTime, 30000);
 
     return () => {
-      window.removeEventListener("reveal-header", handleReveal);
-      clearTimeout(timer);
-      cleanupSplits(barSplitsRef);
+      window.removeEventListener("reveal-header", onReveal);
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("keydown", onKeyDown);
+      window.clearTimeout(fallback);
+      window.clearInterval(clock);
     };
-  }, [revealHeader, cleanupSplits]);
+  }, []);
 
-  // ---- Open / Close overlay ----
-  const openMenu = useCallback(() => {
-    if (!overlayRef.current || !navListRef.current) return;
-
-    if (openTimelineRef.current) {
-      openTimelineRef.current.kill();
-    }
-    cleanupSplits(navSplitsRef);
-
-    // SplitText on nav links
-    const navLinkEls = navListRef.current.querySelectorAll<HTMLElement>(`.${styles.navLink}`);
-    const parentSplits: SplitText[] = [];
-    const childSplits: SplitText[] = [];
-
-    navLinkEls.forEach((el) => {
-      const parent = new SplitText(el, {
-        type: "lines",
-        linesClass: styles.lineMask,
-      });
-      const child = new SplitText(parent.lines, {
-        type: "lines",
-        linesClass: styles.lineInner,
-      });
-      parentSplits.push(parent);
-      childSplits.push(child);
-    });
-
-    navSplitsRef.current = [...parentSplits, ...childSplits];
-    const navInnerLines = childSplits.flatMap((c) => c.lines);
-
-    // Initial states
-    gsap.set(navInnerLines, { yPercent: 110, opacity: 0 });
-    gsap.set(
-      [footerLeftRef.current, footerRightRef.current].filter(Boolean),
-      { opacity: 0, y: 12 }
-    );
-
-    const tl = gsap.timeline({
-      defaults: { ease: "expo.out" },
-    });
-    openTimelineRef.current = tl;
-
-    // 1. Slide overlay panel down (clip-path reveal)
-    tl.to(overlayRef.current, {
-      clipPath: "inset(0 0 0% 0)",
-      duration: 0.9,
-      ease: "expo.inOut",
-    }, 0);
-
-    // 2. Nav links SplitText reveal
-    tl.to(navInnerLines, {
-      yPercent: 0,
-      opacity: 1,
-      duration: 1.2,
-      stagger: 0.06,
-      ease: "expo.out",
-    }, 0.35);
-
-    // 3. Footer sections fade in
-    tl.to(
-      [footerLeftRef.current, footerRightRef.current].filter(Boolean),
-      { opacity: 1, y: 0, duration: 0.8, stagger: 0.08 },
-      0.65
-    );
-  }, [cleanupSplits]);
-
-  const closeMenu = useCallback(() => {
-    if (!overlayRef.current) return;
-
-    if (openTimelineRef.current) {
-      openTimelineRef.current.kill();
-    }
-
-    const tl = gsap.timeline({
-      defaults: { ease: "expo.inOut" },
-      onComplete: () => {
-        cleanupSplits(navSplitsRef);
-        gsap.set(
-          [footerLeftRef.current, footerRightRef.current].filter(Boolean),
-          { opacity: 0, y: 12 }
-        );
-      },
-    });
-    openTimelineRef.current = tl;
-
-    // Slide overlay back up
-    tl.to(overlayRef.current, {
-      clipPath: "inset(0 0 100% 0)",
-      duration: 0.75,
-      ease: "expo.inOut",
-    }, 0);
-  }, [cleanupSplits]);
-
-  // Toggle handler
-  const handleToggle = useCallback(() => {
-    setIsOpen((prev) => {
-      const next = !prev;
-      if (next) {
-        openMenu();
-      } else {
-        closeMenu();
-      }
-      return next;
-    });
-  }, [openMenu, closeMenu]);
-
-  // Handle Escape key
   useEffect(() => {
-    const handleEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape" && isOpen) {
-        handleToggle();
-      }
-    };
-    window.addEventListener("keydown", handleEsc);
-    return () => window.removeEventListener("keydown", handleEsc);
-  }, [isOpen, handleToggle]);
+    if (!overlayRef.current) return;
+    document.body.style.overflow = isOpen ? "hidden" : "";
+    gsap.to(overlayRef.current, {
+      clipPath: isOpen ? "inset(0 0 0% 0)" : "inset(0 0 100% 0)",
+      duration: 0.85,
+      ease: "expo.inOut",
+      pointerEvents: isOpen ? "auto" : "none",
+    });
+  }, [isOpen]);
 
   return (
-    <header className={styles.header} ref={headerRef}>
-      {/* ================================================================
-          Top Bar — always fixed on top (both closed & open)
-          ================================================================ */}
-      <div className={`${styles.topBar} ${isScrolled && !isOpen ? styles.scrolled : ""}`} ref={topBarRef}>
-        {/* Left: Hamburger / Close */}
+    <>
+      <header
+        className={`${styles.header} ${isScrolled ? styles.scrolled : ""} ${
+          isOpen ? styles.menuOpen : ""
+        } ${hasRevealed ? styles.revealed : ""}`}
+      >
         <button
           type="button"
-          className={`${styles.menuToggle} ${isDark ? styles.dark : ""}`}
-          onClick={handleToggle}
-          aria-label={isOpen ? "Close menu" : "Open menu"}
+          className={styles.menuToggle}
+          onClick={() => setIsOpen((v) => !v)}
           aria-expanded={isOpen}
         >
-          <span className={`${styles.hamburgerIcon} ${isOpen ? styles.hamburgerOpen : ""}`}>
+          <span className={styles.hamburger} aria-hidden="true">
             <span />
             <span />
           </span>
-          <span className={styles.menuLabel}>
-            {isOpen ? "Close" : "Menu"}
-          </span>
+          <span>{isOpen ? "Close" : "Menu"}</span>
         </button>
 
-        {/* Center: Brand (stays visible, transitions to dark mode in menu or on scroll) */}
-        <Link
-          href="/"
-          className={`${styles.brand} ${isDark ? styles.dark : ""}`}
-          onClick={() => isOpen && handleToggle()}
-        >
-          <Image
-            src="/images/logo.png"
-            alt="Yatra Zenith"
-            width={36}
-            height={36}
-            className={styles.logoImg}
-            priority
-          />
-          <div className={styles.brandTextGroup}>
-            <span className={styles.brandTitle}>Yatra</span>
-            <span className={styles.brandSub}>Zenith / Journeys Above the Ordinary</span>
-          </div>
+        <Link href="/" className={styles.brand} onClick={() => setIsOpen(false)}>
+          <Image src="/images/logo.png" alt="Yatra Zenith" width={34} height={34} priority />
+          <span className={styles.brandText}>
+            <span className={styles.brandTitle}>Yatra Zenith</span>
+            <span className={styles.brandSub}>Journeys Above the Ordinary</span>
+          </span>
         </Link>
 
-        {/* Right: CTA Pill (stays visible, transitions to dark mode in menu or on scroll) */}
-        <Link
-          href="#plan"
-          className={`${styles.ctaPill} ${isDark ? styles.dark : ""}`}
-          onClick={() => isOpen && handleToggle()}
-        >
-          Plan Your Journey
-        </Link>
-      </div>
-
-      {/* ================================================================
-          Overlay Panel — the dropdown menu
-          ================================================================ */}
-      <div className={styles.overlay} ref={overlayRef}>
-        {/* Nav Links */}
-        <div className={styles.overlayBody}>
-          <ul className={styles.navList} ref={navListRef}>
-            {navLinks.map((item) => (
-              <li key={item.title} className={styles.navItem}>
-                <Link
-                  href={item.href}
-                  className={styles.navLink}
-                  onClick={() => isOpen && handleToggle()}
-                >
-                  {item.title}
-                </Link>
-              </li>
-            ))}
-          </ul>
+        <div className={styles.actions}>
+          <Link href="#plan" className={styles.cta} onClick={() => setIsOpen(false)}>
+            Plan Your Journey
+          </Link>
         </div>
+      </header>
 
-        {/* Footer: Contact + Socials */}
+      <nav ref={overlayRef} className={styles.overlay} aria-label="Primary Navigation">
+        <ul className={styles.navList}>
+          {navLinks.map((item) => (
+            <li key={item.num}>
+              <Link href={item.href} className={styles.navLink} onClick={() => setIsOpen(false)}>
+                <span className={styles.navNum}>{item.num}</span>
+                <span>{item.label}</span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+
         <div className={styles.overlayFooter}>
-          <div className={styles.footerSection} ref={footerLeftRef}>
-            <span className={styles.footerLabel}>Contact</span>
+          <span>Dehradun &amp; Leh Atelier · {istTime} IST</span>
+          <div className={styles.footerLinks}>
             {contactLinks.map((c) => (
-              <a
-                key={c.label}
-                href={c.href}
-                className={styles.footerLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {c.label}: {c.value}
-              </a>
+              <a key={c.label} href={c.href}>{c.label}</a>
             ))}
-          </div>
-          <div className={styles.footerSectionRight} ref={footerRightRef}>
-            <span className={styles.footerLabel}>Socials</span>
             {socialLinks.map((s) => (
-              <a
-                key={s.label}
-                href={s.href}
-                className={styles.footerLink}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                {s.label}
-              </a>
+              <a key={s.label} href={s.href} target="_blank" rel="noreferrer">{s.label}</a>
             ))}
           </div>
         </div>
-      </div>
-    </header>
+      </nav>
+    </>
   );
 }
