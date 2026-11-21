@@ -51,7 +51,6 @@ export default function Preloader({
     const altitudeRef = useRef<HTMLSpanElement>(null);
     const [done, setDone] = useState(false);
 
-    // Italicize final word ("Yatra" + <em>"Zenith"</em>) to echo the hero display typography
     const words = title.trim().split(/\s+/);
     const emphasisWord = words.length > 1 ? words.pop() : null;
     const primaryWords = words.join(" ");
@@ -69,7 +68,7 @@ export default function Preloader({
             window.__yatraPreloaderDone = false;
             window.scrollTo(0, 0);
 
-            // Lock scroll WITHOUT toggling body overflow (prevents Windows scrollbar pop-in & layout shift)
+            // Lock scroll without modifying body overflow (prevents scrollbar jump)
             const preventWheelOrTouch = (e: Event) => {
                 e.preventDefault();
             };
@@ -149,7 +148,6 @@ export default function Preloader({
 
                 tl = gsap.timeline({ onComplete: finish });
 
-                // 1. Architectural frame & typographic entrance
                 tl.fromTo(
                     "[data-pre-rule]",
                     { scaleX: 0 },
@@ -211,8 +209,6 @@ export default function Preloader({
                         { y: 0, autoAlpha: 1, duration: 0.75, ease: "power3.out" },
                         0.42
                     )
-
-                    // 2. Organic two-beat ascent (0 -> 74 -> 100)
                     .to(
                         state,
                         {
@@ -251,8 +247,6 @@ export default function Preloader({
                         },
                         "<"
                     )
-
-                    // 3. Content lifts away cleanly
                     .to(
                         [
                             crestRef.current,
@@ -280,8 +274,6 @@ export default function Preloader({
                         },
                         "<"
                     )
-
-                    // 4. Dual-layer curtain wipe synced with hero reveal
                     .add(notifyReveal, "-=0.18")
                     .to(
                         panel,
@@ -333,7 +325,6 @@ export default function Preloader({
             role="status"
             aria-label="Loading Yatra Zenith"
         >
-            {/* Trailing warm-bronze veil for depth during curtain lift */}
             <div ref={veilRef} className={styles.veil} aria-hidden="true" />
 
             <div ref={panelRef} className={styles.panel}>
@@ -341,7 +332,6 @@ export default function Preloader({
                 <div className={styles.glow} aria-hidden="true" />
 
                 <div ref={innerRef} className={styles.inner}>
-                    {/* Top Editorial Bar */}
                     <div className={styles.topSection}>
                         <div className={styles.metaBar} data-pre-meta>
                             <span>30.0668° N · 79.0193° E</span>
@@ -354,7 +344,6 @@ export default function Preloader({
                         <div className={styles.rule} data-pre-rule aria-hidden="true" />
                     </div>
 
-                    {/* Centerpiece Lockup */}
                     <div className={styles.center}>
                         <div ref={crestRef} className={styles.crest}>
                             <svg
@@ -407,7 +396,6 @@ export default function Preloader({
             </span>
                     </div>
 
-                    {/* Bottom Progress & Monumental Counter */}
                     <div className={styles.bottomSection}>
                         <div className={styles.barTrack} data-pre-rule>
                             <div ref={barFillRef} className={styles.barFill} />
@@ -417,9 +405,8 @@ export default function Preloader({
                             <div className={styles.bottomLeft}>
                                 <span className={styles.label}>Curated Expeditions</span>
                                 <span className={styles.altitude}>
-                  Elevation{" "}
-                                    <strong ref={altitudeRef}>1,400M</strong>
-                </span>
+                                    Elevation <strong ref={altitudeRef}>1,400M</strong>
+                                </span>
                             </div>
 
                             <div className={styles.counterWrap}>
