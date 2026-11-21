@@ -36,7 +36,6 @@ export default function Landing() {
             let revealTl: gsap.core.Timeline | null = null;
             let scrollPulseTl: gsap.core.Timeline | null = null;
 
-            // 1. Multi-layer scrubbed parallax
             const mm = gsap.matchMedia();
 
             mm.add(
@@ -93,7 +92,6 @@ export default function Landing() {
                 }
             );
 
-            // 2. Initial states
             const prefersReducedMotion = window.matchMedia(
                 "(prefers-reduced-motion: reduce)"
             ).matches;
@@ -126,7 +124,6 @@ export default function Landing() {
             );
             gsap.set(dividerRef.current, { scaleX: 0, transformOrigin: "left center" });
 
-            // 3. Synchronized SplitText & cinema reveal
             const playReveal = () => {
                 if (isCancelled || hasPlayed || !titleRef.current || !leadRef.current) {
                     return;
