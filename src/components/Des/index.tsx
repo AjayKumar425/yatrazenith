@@ -30,21 +30,13 @@ export interface DescriptionProps {
   stats?: DescriptionStat[];
 }
 
-const DEFAULT_STATS: DescriptionStat[] = [
-  { index: "01", value: "14+", label: "Private Sanctuaries" },
-  { index: "02", value: "4,800M", label: "Peak Elevation" },
-  { index: "03", value: "100%", label: "Bespoke Passage" },
-];
 
 export default function Description({
   coordinates = "Garhwal & Kumaon · 1,400M — 4,800M",
   imageSrc = "/images/philosophy.jpg",
   imageAlt = "Quiet Himalayan stone sanctuary overlooking misty mountain ridges",
-  imageCaption = "Fig. 01 — High-Altitude Sanctuary",
-  imageCoords = "30.48° N · 79.21° E",
   ctaLabel = "Our Approach",
   ctaHref = "#plan",
-  stats = DEFAULT_STATS,
 }: DescriptionProps) {
   const sectionRef = useRef<HTMLElement>(null);
   const topRuleRef = useRef<HTMLDivElement>(null);
@@ -289,23 +281,6 @@ export default function Description({
                   </span>
                 </Link>
               </Rounded>
-            </div>
-
-            <div className={styles.stats} data-stats-grid>
-              {stats.map((item) => (
-                <div key={item.index} className={styles.statCard}>
-                  <div
-                    className={styles.statRule}
-                    data-stat-rule
-                    aria-hidden="true"
-                  />
-                  <div className={styles.statInner} data-stat-item>
-                    <span className={styles.statIndex}>{item.index}</span>
-                    <span className={styles.statValue}>{item.value}</span>
-                    <span className={styles.statLabel}>{item.label}</span>
-                  </div>
-                </div>
-              ))}
             </div>
           </div>
         </div>
