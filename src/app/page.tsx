@@ -29,8 +29,8 @@ export default function Home() {
     <main className={styles.main}>
       <Preloader />
       <Landing />
-      <Philo />
       <Des />
+      <Philo />
       <JourneyPlanner />
       <Footer />
     </main>
