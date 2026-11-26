@@ -8,32 +8,24 @@ import { useGSAP } from "@gsap/react";
 import { SplitText } from "gsap/SplitText";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Rounded from "@/ui/Rounded";
+import MaskReveal from "@/ui/MaskReveal";
 import styles from "./style.module.scss";
 
 gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
-
-export interface DescriptionStat {
-  index: string;
-  value: string;
-  label: string;
-}
 
 export interface DescriptionProps {
   eyebrow?: string;
   coordinates?: string;
   imageSrc?: string;
   imageAlt?: string;
-  imageCaption?: string;
-  imageCoords?: string;
   ctaLabel?: string;
   ctaHref?: string;
-  stats?: DescriptionStat[];
 }
 
-
 export default function Description({
+  eyebrow = "01 / Philosophy",
   coordinates = "Garhwal & Kumaon · 1,400M — 4,800M",
-  imageSrc = "/images/philosophy.jpg",
+  imageSrc = "/images/sanctuary-terrace.jpg",
   imageAlt = "Quiet Himalayan stone sanctuary overlooking misty mountain ridges",
   ctaLabel = "Our Approach",
   ctaHref = "#plan",
@@ -62,22 +54,22 @@ export default function Description({
       let manifestoSplit: SplitText | null = null;
       let bodySplit: SplitText | null = null;
 
-      gsap.fromTo(
-        "[data-desc-meta]",
-        { y: 16, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.9,
-          stagger: 0.08,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: section,
-            start: "top 82%",
-            once: true,
-          },
-        }
-      );
+      if (topRuleRef.current) {
+        gsap.fromTo(
+          topRuleRef.current,
+          { scaleX: 0 },
+          {
+            scaleX: 1,
+            duration: 1.0,
+            ease: "expo.inOut",
+            scrollTrigger: {
+              trigger: section,
+              start: "top 84%",
+              once: true,
+            },
+          }
+        );
+      }
 
       if (frameRef.current && imageWrapRef.current) {
         gsap.fromTo(
@@ -85,11 +77,11 @@ export default function Description({
           { clipPath: "inset(14% 0% 0% 0%)" },
           {
             clipPath: "inset(0% 0% 0% 0%)",
-            duration: 1.35,
+            duration: 1.3,
             ease: "expo.out",
             scrollTrigger: {
               trigger: frameRef.current,
-              start: "top 84%",
+              start: "top 85%",
               once: true,
             },
           }
@@ -112,54 +104,23 @@ export default function Description({
         );
       }
 
-      gsap.fromTo(
-        ctaRef.current,
-        { y: 20, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.95,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: ctaRef.current,
-            start: "top 88%",
-            once: true,
-          },
-        }
-      );
-
-      gsap.fromTo(
-        "[data-stat-rule]",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 1.0,
-          stagger: 0.1,
-          ease: "expo.inOut",
-          scrollTrigger: {
-            trigger: "[data-stats-grid]",
-            start: "top 86%",
-            once: true,
-          },
-        }
-      );
-
-      gsap.fromTo(
-        "[data-stat-item]",
-        { y: 22, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.9,
-          stagger: 0.1,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: "[data-stats-grid]",
-            start: "top 86%",
-            once: true,
-          },
-        }
-      );
+      if (ctaRef.current) {
+        gsap.fromTo(
+          ctaRef.current,
+          { y: 18, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.9,
+            ease: "expo.out",
+            scrollTrigger: {
+              trigger: ctaRef.current,
+              start: "top 88%",
+              once: true,
+            },
+          }
+        );
+      }
 
       document.fonts.ready.then(() => {
         if (isCancelled || !manifestoRef.current || !copyWrapRef.current) {
@@ -180,8 +141,8 @@ export default function Description({
               ease: "none",
               scrollTrigger: {
                 trigger: manifestoRef.current,
-                start: "top 80%",
-                end: "bottom 50%",
+                start: "top 82%",
+                end: "bottom 52%",
                 scrub: 0.5,
               },
             }
@@ -194,6 +155,17 @@ export default function Description({
             linesClass: styles.splitLine,
           });
 
+          if (bodySplit.masks.length > 0) {
+            gsap.set(bodySplit.masks, {
+              paddingTop: "0.14em",
+              paddingBottom: "0.18em",
+              marginTop: "-0.14em",
+              marginBottom: "-0.18em",
+              paddingInline: "0.06em",
+              marginInline: "-0.06em",
+            });
+          }
+
           gsap.fromTo(
             bodySplit.lines,
             { yPercent: 110 },
@@ -202,9 +174,12 @@ export default function Description({
               duration: 1.05,
               stagger: 0.055,
               ease: "expo.out",
+              onComplete: () => {
+                bodySplit?.revert();
+              },
               scrollTrigger: {
                 trigger: copyWrapRef.current,
-                start: "top 82%",
+                start: "top 84%",
                 once: true,
               },
             }
@@ -232,6 +207,14 @@ export default function Description({
       aria-labelledby="philosophy-heading"
     >
       <div className={styles.inner}>
+        <div className={styles.metaRow}>
+          <MaskReveal className={styles.eyebrow}>{eyebrow}</MaskReveal>
+          <MaskReveal delay={0.08} className={styles.coords}>
+            {coordinates}
+          </MaskReveal>
+        </div>
+        <div ref={topRuleRef} className={styles.topRule} aria-hidden="true" />
+
         <h2
           ref={manifestoRef}
           id="philosophy-heading"
@@ -250,11 +233,15 @@ export default function Description({
                   src={imageSrc}
                   alt={imageAlt}
                   fill
-                  sizes="(max-width: 900px) 100vw, 42vw"
+                  sizes="(max-width: 900px) 100vw, 44vw"
                   className={styles.image}
                 />
               </div>
             </div>
+            <figcaption className={styles.caption}>
+              <span>Fig. 01 — High-Altitude Stone &amp; Cedar Retreat</span>
+              <span>30.48° N · 79.21° E</span>
+            </figcaption>
           </figure>
 
           <div className={styles.contentCol}>
@@ -272,8 +259,23 @@ export default function Description({
               </p>
             </div>
 
+            <div className={styles.stats}>
+              <div className={styles.statItem}>
+                <span className={styles.statVal}>14+</span>
+                <span className={styles.statLabel}>Private Sanctuaries</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statVal}>4,800M</span>
+                <span className={styles.statLabel}>Peak Elevation</span>
+              </div>
+              <div className={styles.statItem}>
+                <span className={styles.statVal}>100%</span>
+                <span className={styles.statLabel}>Bespoke Passage</span>
+              </div>
+            </div>
+
             <div ref={ctaRef} className={styles.ctaWrap}>
-              <Rounded className={styles.ctaBtn} backgroundColor="#322018">
+              <Rounded className={styles.ctaBtn} backgroundColor="#141414">
                 <Link href={ctaHref} className={styles.ctaLink}>
                   <span>{ctaLabel}</span>
                   <span className={styles.arrow} aria-hidden="true">
@@ -281,6 +283,10 @@ export default function Description({
                   </span>
                 </Link>
               </Rounded>
+              <Link href="/menu" className={styles.secondaryLink}>
+                <span>Browse Experiences Menu</span>
+                <span aria-hidden="true">→</span>
+              </Link>
             </div>
           </div>
         </div>

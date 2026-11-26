@@ -65,6 +65,30 @@ export default function Preloader({
             let titleSplit: SplitText | null = null;
             let tl: gsap.core.Timeline | null = null;
 
+            const hash = window.location.hash;
+            const alreadySeen = window.__yatraPreloaderDone === true;
+
+            const notifyReveal = () => {
+                window.__yatraPreloaderDone = true;
+                window.dispatchEvent(new CustomEvent("reveal-header"));
+                window.dispatchEvent(new CustomEvent("preloader-exit"));
+            };
+
+            if (hash || alreadySeen) {
+                notifyReveal();
+                ScrollTrigger.refresh();
+                setDone(true);
+                if (hash) {
+                    const targetId = hash.slice(1);
+                    window.requestAnimationFrame(() => {
+                        document
+                            .getElementById(targetId)
+                            ?.scrollIntoView({ behavior: "smooth" });
+                    });
+                }
+                return;
+            }
+
             window.__yatraPreloaderDone = false;
             window.scrollTo(0, 0);
 
@@ -91,12 +115,6 @@ export default function Preloader({
             });
             window.addEventListener("keydown", preventScrollKeys);
 
-            const notifyReveal = () => {
-                window.__yatraPreloaderDone = true;
-                window.dispatchEvent(new CustomEvent("reveal-header"));
-                window.dispatchEvent(new CustomEvent("preloader-exit"));
-            };
-
             const finish = () => {
                 unlockScroll();
                 ScrollTrigger.refresh();
@@ -121,6 +139,17 @@ export default function Preloader({
                     mask: "lines",
                     linesClass: styles.splitLine,
                 });
+
+                if (titleSplit.masks.length > 0) {
+                    gsap.set(titleSplit.masks, {
+                        paddingTop: "0.14em",
+                        paddingBottom: "0.18em",
+                        marginTop: "-0.14em",
+                        marginBottom: "-0.18em",
+                        paddingInline: "0.08em",
+                        marginInline: "-0.08em",
+                    });
+                }
 
                 const ring = ringCircleRef.current;
                 const ringLength = ring ? ring.getTotalLength() : 220;
@@ -348,20 +377,20 @@ export default function Preloader({
                         <div ref={crestRef} className={styles.crest}>
                             <svg
                                 className={styles.crestRing}
-                                viewBox="0 0 76 76"
+                                viewBox="0 0 82 82"
                                 aria-hidden="true"
                             >
                                 <circle
-                                    cx="38"
-                                    cy="38"
-                                    r="35"
+                                    cx="41"
+                                    cy="41"
+                                    r="38"
                                     className={styles.ringTrack}
                                 />
                                 <circle
                                     ref={ringCircleRef}
-                                    cx="38"
-                                    cy="38"
-                                    r="35"
+                                    cx="41"
+                                    cy="41"
+                                    r="38"
                                     className={styles.ringProgress}
                                 />
                             </svg>
@@ -369,8 +398,8 @@ export default function Preloader({
                                 <Image
                                     src="/images/logo.png"
                                     alt="Yatra Zenith Crest"
-                                    width={54}
-                                    height={54}
+                                    width={60}
+                                    height={60}
                                     className={styles.logo}
                                     priority
                                 />

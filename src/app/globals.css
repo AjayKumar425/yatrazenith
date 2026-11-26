@@ -15,20 +15,35 @@
 }
 
 :root {
-  --color-obsidian: #140f0c;
-  --color-dark: #322018;
-  --color-dark-rgb: 50, 32, 24;
-  --color-light: #eae5df;
-  --color-light-rgb: 234, 229, 223;
-  --color-white: #f8f6f4;
-  --color-white-rgb: 248, 246, 244;
-  --color-sand: #f5f2ed;
-  --color-accent: #c49a6c;
-  --color-accent-rgb: 196, 154, 108;
-  --color-stone-100: #e0d9d1;
-  --color-stone-200: #cec3b6;
-  --color-border: rgba(50, 32, 24, 0.12);
-  --color-border-light: rgba(248, 246, 244, 0.2);
+  --color-canvas: #f8f8f6;
+  --color-surface: #ffffff;
+  --color-surface-muted: #f1f1ee;
+  --color-ink: #141414;
+  --color-ink-secondary: #5c5c5c;
+  --color-ink-muted: #767672;
+
+  --color-obsidian: #111112;
+  --color-dark: #141414;
+  --color-dark-rgb: 20, 20, 20;
+  --color-light: #f8f8f6;
+  --color-light-rgb: 248, 248, 246;
+  --color-white: #f8f8f6;
+  --color-white-rgb: 248, 248, 246;
+  --color-sand: #f1f1ee;
+
+  --color-accent: #8f6a42;
+  --color-accent-light: #c49a6c;
+  --color-accent-rgb: 143, 106, 66;
+
+  --color-stone-100: #ecece8;
+  --color-stone-200: #dcdcd6;
+  --color-border: rgba(20, 20, 20, 0.1);
+  --color-border-strong: rgba(20, 20, 20, 0.18);
+  --color-border-light: rgba(248, 248, 246, 0.16);
+
+  --container-max: 1380px;
+  --gutter: clamp(1.25rem, 4vw, 3.5rem);
+  --section-py: clamp(4.5rem, 8.5vw, 7.5rem);
 
   --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 
@@ -47,15 +62,15 @@
 
 html {
   font-family: var(--font-sans-family);
-  background-color: var(--color-obsidian);
-  color: var(--color-dark);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overscroll-behavior: none;
 
   scrollbar-width: thin;
-  scrollbar-color: rgba(196, 154, 108, 0.45) var(--color-obsidian);
+  scrollbar-color: rgba(143, 106, 66, 0.45) var(--color-obsidian);
 }
 
 html::-webkit-scrollbar {
@@ -72,15 +87,15 @@ html::-webkit-scrollbar-thumb {
 }
 
 html::-webkit-scrollbar-thumb:hover {
-  background: var(--color-accent);
+  background: var(--color-accent-light);
 }
 
 body {
   width: 100%;
   min-height: 100svh;
   overflow-x: clip;
-  background-color: var(--color-light);
-  color: var(--color-dark);
+  background-color: var(--color-canvas);
+  color: var(--color-ink);
 }
 
 /* Lenis smooth scroll */
@@ -106,12 +121,12 @@ html.lenis body {
 }
 
 ::selection {
-  background-color: var(--color-dark);
-  color: var(--color-white);
+  background-color: var(--color-ink);
+  color: var(--color-canvas);
 }
 
 :focus-visible {
-  outline: 1px solid var(--color-accent);
+  outline: 1.5px solid var(--color-accent);
   outline-offset: 3px;
 }
 

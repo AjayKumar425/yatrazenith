@@ -8,34 +8,29 @@ import { useRef } from "react";
 gsap.registerPlugin(useGSAP);
 
 interface ButtonProps {
-    isActive: boolean;
-    setIsActive: (isActive: boolean) => void;
+  isActive: boolean;
+  setIsActive: (isActive: boolean) => void;
 }
 
 export default function Button({ isActive, setIsActive }: ButtonProps) {
-    const buttonRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLDivElement>(null);
 
-    useGSAP(() => {
-        
-    }, { scope: buttonRef, dependencies: [isActive] });
-    return (
-        <div onClick={() => { setIsActive(!isActive)}} className={styles.button} ref={buttonRef}>
-            <div className={styles.slider}>
+  useGSAP(
+    () => {
+      // Reserved for interactive slider state
+    },
+    { scope: buttonRef, dependencies: [isActive] }
+  );
 
-            </div>
-        </div>
-    )
-}
-
-interface PerspectiveTextProps {
-    label: string;
-}
-
-function PersPectiveText({ label }: PerspectiveTextProps) {
-    return (
-        <div className={styles.perspectiveText}>
-            <p>{label}</p>
-            <p>{label}</p>
-        </div>
-    )
+  return (
+    <div
+      onClick={() => {
+        setIsActive(!isActive);
+      }}
+      className={styles.button}
+      ref={buttonRef}
+    >
+      <div className={styles.slider} />
+    </div>
+  );
 }

@@ -8,8 +8,8 @@
 .veil {
   position: absolute;
   inset: 0;
-  background-color: #251b14;
-  border-bottom: 1px solid rgba(196, 154, 108, 0.45);
+  background-color: #ebe7e0;
+  border-bottom: 1px solid rgba(20, 20, 20, 0.14);
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
 }
@@ -18,11 +18,12 @@
   position: absolute;
   inset: 0;
   background: radial-gradient(
-          ellipse 80% 70% at 50% 45%,
-          #1d1510 0%,
-          #120d0a 100%
+    ellipse 88% 76% at 50% 42%,
+    #ffffff 0%,
+    #f7f5f0 68%,
+    #f0ece4 100%
   );
-  color: var(--color-white, #f8f6f4);
+  color: #141414;
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
   overflow: hidden;
@@ -32,7 +33,7 @@
   position: absolute;
   inset: 0;
   pointer-events: none;
-  opacity: 0.045;
+  opacity: 0.025;
   background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   background-size: 180px 180px;
 }
@@ -42,9 +43,9 @@
   inset: 0;
   pointer-events: none;
   background: radial-gradient(
-          circle at 50% 48%,
-          rgba(196, 154, 108, 0.09) 0%,
-          rgba(196, 154, 108, 0) 56%
+    circle at 50% 46%,
+    rgba(166, 124, 82, 0.06) 0%,
+    rgba(166, 124, 82, 0) 58%
   );
 }
 
@@ -52,7 +53,7 @@
   position: relative;
   z-index: 1;
   height: 100%;
-  max-width: 1460px;
+  max-width: 1440px;
   margin: 0 auto;
   display: flex;
   flex-direction: column;
@@ -77,7 +78,7 @@
   font-size: 0.68rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(248, 246, 244, 0.56);
+  color: rgba(20, 20, 20, 0.52);
   opacity: 0;
   visibility: hidden;
 }
@@ -86,7 +87,7 @@
   display: inline-flex;
   align-items: center;
   gap: 0.55rem;
-  color: rgba(248, 246, 244, 0.74);
+  color: rgba(20, 20, 20, 0.78);
 
   @media (max-width: 720px) {
     display: none;
@@ -97,13 +98,13 @@
   width: 5px;
   height: 5px;
   border-radius: 50%;
-  background: var(--color-accent, #c49a6c);
+  background: #9b7045;
 }
 
 .rule {
   width: 100%;
   height: 1px;
-  background: rgba(248, 246, 244, 0.1);
+  background: rgba(20, 20, 20, 0.1);
   transform-origin: left center;
   will-change: transform;
 }
@@ -119,8 +120,8 @@
 
 .crest {
   position: relative;
-  width: 76px;
-  height: 76px;
+  width: 82px;
+  height: 82px;
   display: grid;
   place-items: center;
   margin-bottom: 0.35rem;
@@ -139,40 +140,41 @@
 
 .ringTrack {
   fill: none;
-  stroke: rgba(248, 246, 244, 0.12);
+  stroke: rgba(20, 20, 20, 0.1);
   stroke-width: 1;
 }
 
 .ringProgress {
   fill: none;
-  stroke: var(--color-accent, #c49a6c);
-  stroke-width: 1.2;
+  stroke: #9b7045;
+  stroke-width: 1.4;
 }
 
 .medallion {
-  width: 54px;
-  height: 54px;
+  width: 60px;
+  height: 60px;
   border-radius: 50%;
   overflow: hidden;
-  background: #ede6dc;
+  background: #ffffff;
+  border: 1px solid rgba(20, 20, 20, 0.08);
   display: grid;
   place-items: center;
-  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.45);
+  box-shadow: 0 10px 30px -12px rgba(20, 20, 20, 0.18);
 }
 
 .logo {
   width: 100%;
   height: 100%;
   object-fit: contain;
-  filter: brightness(0.92) sepia(0.1) contrast(1.04);
 }
 
 .subtitle {
   font-family: var(--font-mono-family);
   font-size: 0.68rem;
+  font-weight: 500;
   letter-spacing: 0.26em;
   text-transform: uppercase;
-  color: var(--color-accent, #c49a6c);
+  color: #8c6239;
   opacity: 0;
   visibility: hidden;
 }
@@ -183,14 +185,14 @@
   font-weight: 200;
   letter-spacing: -0.015em;
   line-height: 1.04;
-  color: var(--color-white, #f8f6f4);
+  color: #141414;
   opacity: 0;
   visibility: hidden;
 
   em {
     font-style: italic;
     font-weight: 200;
-    color: var(--color-light, #e6ddd2);
+    color: #555049;
     padding-right: 0.08em;
   }
 }
@@ -206,7 +208,7 @@
   font-size: 0.66rem;
   letter-spacing: 0.22em;
   text-transform: uppercase;
-  color: rgba(248, 246, 244, 0.46);
+  color: rgba(20, 20, 20, 0.48);
   margin-top: 0.15rem;
   opacity: 0;
   visibility: hidden;
@@ -215,7 +217,7 @@
 .barTrack {
   width: 100%;
   height: 1px;
-  background: rgba(248, 246, 244, 0.12);
+  background: rgba(20, 20, 20, 0.1);
   overflow: hidden;
   transform-origin: left center;
 }
@@ -224,9 +226,9 @@
   width: 100%;
   height: 100%;
   background: linear-gradient(
-          90deg,
-          rgba(196, 154, 108, 0.5) 0%,
-          var(--color-accent, #c49a6c) 100%
+    90deg,
+    rgba(20, 20, 20, 0.85) 0%,
+    #9b7045 100%
   );
   transform: scaleX(0);
   transform-origin: left center;
@@ -253,7 +255,7 @@
   font-size: 0.66rem;
   letter-spacing: 0.18em;
   text-transform: uppercase;
-  color: rgba(248, 246, 244, 0.56);
+  color: rgba(20, 20, 20, 0.56);
 }
 
 .altitude {
@@ -261,11 +263,11 @@
   font-size: 0.68rem;
   letter-spacing: 0.16em;
   text-transform: uppercase;
-  color: rgba(248, 246, 244, 0.4);
+  color: rgba(20, 20, 20, 0.44);
 
   strong {
-    font-weight: 400;
-    color: var(--color-accent, #c49a6c);
+    font-weight: 500;
+    color: #8c6239;
     font-variant-numeric: tabular-nums;
   }
 }
@@ -283,7 +285,7 @@
   font-weight: 200;
   letter-spacing: -0.02em;
   font-variant-numeric: tabular-nums;
-  color: var(--color-white, #f8f6f4);
+  color: #141414;
 }
 
 .counterUnit {
@@ -291,5 +293,5 @@
   font-size: 0.78rem;
   letter-spacing: 0.08em;
   margin-top: 0.35rem;
-  color: var(--color-accent, #c49a6c);
+  color: #8c6239;
 }
