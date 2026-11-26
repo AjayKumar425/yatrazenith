@@ -4,12 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { SplitText } from "gsap/SplitText";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import Rounded from "@/ui/Rounded";
+import MaskReveal from "@/ui/MaskReveal";
 import styles from "./style.module.scss";
 
-gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger);
+gsap.registerPlugin(useGSAP);
 
 export default function Footer() {
   const [email, setEmail] = useState("");
@@ -18,7 +17,6 @@ export default function Footer() {
   const [year, setYear] = useState<number>(2026);
 
   const footerRef = useRef<HTMLElement>(null);
-  const leadRef = useRef<HTMLHeadingElement>(null);
   const wordmarkRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -50,108 +48,76 @@ export default function Footer() {
 
       if (prefersReducedMotion) return;
 
-      gsap.fromTo(
-        "[data-footer-rule]",
-        { scaleX: 0 },
-        {
-          scaleX: 1,
-          duration: 1.05,
-          stagger: 0.1,
-          ease: "expo.inOut",
-          scrollTrigger: {
-            trigger: footer,
-            start: "top 86%",
-            once: true,
-          },
-        }
-      );
+      const rules = footer.querySelectorAll("[data-footer-rule]");
+      const cols = footer.querySelectorAll("[data-footer-col]");
+      const wordmark = wordmarkRef.current;
 
-      gsap.fromTo(
-        "[data-footer-col]",
-        { y: 20, autoAlpha: 0 },
-        {
-          y: 0,
-          autoAlpha: 1,
-          duration: 0.85,
-          stagger: 0.07,
-          ease: "expo.out",
-          scrollTrigger: {
-            trigger: "[data-footer-columns]",
-            start: "top 88%",
-            once: true,
-          },
-        }
-      );
-
-      if (wordmarkRef.current) {
+      const revealFooter = () => {
         gsap.fromTo(
-          wordmarkRef.current,
-          { yPercent: 22, autoAlpha: 0 },
+          rules,
+          { scaleX: 0 },
           {
-            yPercent: 0,
-            autoAlpha: 1,
-            duration: 1.15,
-            ease: "expo.out",
-            scrollTrigger: {
-              trigger: wordmarkRef.current,
-              start: "top 95%",
-              once: true,
-            },
+            scaleX: 1,
+            duration: 1.0,
+            stagger: 0.08,
+            ease: "expo.inOut",
           }
         );
-      }
 
-      let isCancelled = false;
-      let fontCtx: gsap.Context | null = null;
-      let leadSplit: SplitText | null = null;
-
-      document.fonts.ready.then(() => {
-        if (isCancelled || !leadRef.current) return;
-
-        fontCtx = gsap.context(() => {
-          leadSplit = SplitText.create(leadRef.current!, {
-            type: "lines",
-            mask: "lines",
-            linesClass: styles.splitLine,
-          });
-
-          if (leadSplit.masks.length > 0) {
-            gsap.set(leadSplit.masks, {
-              paddingTop: "0.16em",
-              paddingBottom: "0.2em",
-              marginTop: "-0.16em",
-              marginBottom: "-0.2em",
-              paddingInline: "0.1em",
-              marginInline: "-0.1em",
-            });
+        gsap.fromTo(
+          cols,
+          { y: 18, autoAlpha: 0 },
+          {
+            y: 0,
+            autoAlpha: 1,
+            duration: 0.8,
+            stagger: 0.06,
+            ease: "expo.out",
           }
+        );
 
+        if (wordmark) {
           gsap.fromTo(
-            leadSplit.lines,
-            { yPercent: 112 },
+            wordmark,
+            { yPercent: 20, autoAlpha: 0 },
             {
               yPercent: 0,
-              duration: 1.1,
-              stagger: 0.09,
+              autoAlpha: 1,
+              duration: 1.05,
               ease: "expo.out",
-              onComplete: () => {
-                leadSplit?.revert();
-              },
-              scrollTrigger: {
-                trigger: leadRef.current,
-                start: "top 88%",
-                once: true,
-              },
             }
           );
-        }, footer);
-      });
-
-      return () => {
-        isCancelled = true;
-        leadSplit?.revert();
-        fontCtx?.revert();
+        }
       };
+
+      const rect = footer.getBoundingClientRect();
+      if (rect.top <= window.innerHeight * 0.96) {
+        revealFooter();
+        return;
+      }
+
+      gsap.set(rules, { scaleX: 0 });
+      gsap.set(cols, { y: 18, autoAlpha: 0 });
+      if (wordmark) gsap.set(wordmark, { yPercent: 20, autoAlpha: 0 });
+
+      const observer = new IntersectionObserver(
+        (entries) => {
+          for (const entry of entries) {
+            if (
+              entry.isIntersecting ||
+              entry.boundingClientRect.top <= window.innerHeight
+            ) {
+              revealFooter();
+              observer.disconnect();
+              break;
+            }
+          }
+        },
+        { threshold: 0.01 }
+      );
+
+      observer.observe(footer);
+      return () => observer.disconnect();
     },
     { scope: footerRef }
   );
@@ -185,8 +151,10 @@ export default function Footer() {
 
         <div className={styles.top}>
           <div className={styles.leadCol}>
-            <h2 ref={leadRef} className={styles.lead}>
-              Let the mountains set the <em>tempo</em> of your next chapter.
+            <h2 className={styles.lead}>
+              <MaskReveal>
+                Let the mountains set the <em>tempo</em> of your next chapter.
+              </MaskReveal>
             </h2>
 
             <div className={styles.ctaWrap}>
@@ -231,7 +199,7 @@ export default function Footer() {
 
         <div className={styles.rule} data-footer-rule aria-hidden="true" />
 
-        <div className={styles.columns} data-footer-columns>
+        <div className={styles.columns}>
           <div data-footer-col>
             <div className={styles.colTitle}>01 / Navigation</div>
             <ul className={styles.list}>

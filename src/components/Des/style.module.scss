@@ -1,8 +1,8 @@
 .description {
   position: relative;
-  background-color: var(--color-canvas, #f8f8f6);
-  color: var(--color-ink, #141414);
-  padding: var(--section-py, clamp(4.5rem, 8.5vw, 7.5rem)) var(--gutter, clamp(1.25rem, 4vw, 3.5rem));
+  background-color: var(--color-canvas, #f6f5f1);
+  color: var(--color-ink, #141413);
+  padding: var(--section-py, clamp(4.5rem, 9vw, 8rem)) var(--gutter, clamp(1.25rem, 4.5vw, 4rem));
   overflow: hidden;
 }
 
@@ -51,15 +51,15 @@
   font-size: clamp(2.1rem, 4.6vw, 4.35rem);
   font-weight: 200;
   line-height: 1.14;
-  letter-spacing: -0.015em;
+  letter-spacing: -0.025em;
   max-width: 24ch;
-  color: var(--color-ink, #141414);
+  color: var(--color-ink, #141413);
   margin-bottom: clamp(3rem, 6.5vw, 5.5rem);
 
   em {
     font-style: italic;
     font-weight: 200;
-    color: var(--color-accent, #8f6a42);
+    color: var(--color-accent, #8a653e);
   }
 }
 

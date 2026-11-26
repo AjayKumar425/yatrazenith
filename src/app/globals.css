@@ -1,53 +1,37 @@
-@font-face {
-  font-family: "PP Editorial New";
-  src: url("/font/PP%20Editorial%20New%20Ultralight.woff2") format("woff2");
-  font-weight: 200;
-  font-style: normal;
-  font-display: swap;
-}
-
-@font-face {
-  font-family: "PP Editorial New";
-  src: url("/font/PP%20Editorial%20New.woff2") format("woff2");
-  font-weight: 400;
-  font-style: normal;
-  font-display: swap;
-}
-
 :root {
-  --color-canvas: #ffffff;
+  --color-canvas: #f6f5f1;
   --color-surface: #ffffff;
-  --color-surface-muted: #f4f4f1;
-  --color-ink: #141414;
-  --color-ink-secondary: #5c5c5c;
-  --color-ink-muted: #767672;
+  --color-surface-muted: #eceae4;
+  --color-ink: #141413;
+  --color-ink-secondary: #66645e;
+  --color-ink-muted: #848179;
 
-  --color-obsidian: #111112;
-  --color-dark: #141414;
-  --color-dark-rgb: 20, 20, 20;
-  --color-light: #ffffff;
-  --color-light-rgb: 255, 255, 255;
-  --color-white: #ffffff;
-  --color-white-rgb: 255, 255, 255;
-  --color-sand: #f4f4f1;
+  --color-obsidian: #141413;
+  --color-dark: #141413;
+  --color-dark-rgb: 20, 20, 19;
+  --color-light: #f6f5f1;
+  --color-light-rgb: 246, 245, 241;
+  --color-white: #f6f5f1;
+  --color-white-rgb: 246, 245, 241;
+  --color-sand: #eceae4;
 
-  --color-accent: #8f6a42;
+  --color-accent: #8a653e;
   --color-accent-light: #c49a6c;
-  --color-accent-rgb: 143, 106, 66;
+  --color-accent-rgb: 138, 101, 62;
 
-  --color-stone-100: #ecece8;
-  --color-stone-200: #dcdcd6;
-  --color-border: rgba(20, 20, 20, 0.1);
-  --color-border-strong: rgba(20, 20, 20, 0.18);
-  --color-border-light: rgba(248, 248, 246, 0.16);
+  --color-stone-100: #eceae4;
+  --color-stone-200: #dbd8cf;
+  --color-border: rgba(20, 20, 19, 0.12);
+  --color-border-strong: rgba(20, 20, 19, 0.22);
+  --color-border-light: rgba(246, 245, 241, 0.16);
 
-  --container-max: 1380px;
-  --gutter: clamp(1.25rem, 4vw, 3.5rem);
-  --section-py: clamp(4.5rem, 8.5vw, 7.5rem);
+  --container-max: 1360px;
+  --gutter: clamp(1.25rem, 4.5vw, 4rem);
+  --section-py: clamp(4.5rem, 9vw, 8rem);
 
   --ease-editorial: cubic-bezier(0.16, 1, 0.3, 1);
 
-  --font-serif-family: "PP Editorial New", Georgia, serif;
+  --font-serif-family: var(--font-serif), Georgia, serif;
   --font-sans-family: var(--font-sans), "Plus Jakarta Sans", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
   --font-mono-family: var(--font-mono), ui-monospace, SFMono-Regular, Menlo, monospace;
 }
@@ -70,7 +54,7 @@ html {
   overscroll-behavior: none;
 
   scrollbar-width: thin;
-  scrollbar-color: rgba(143, 106, 66, 0.45) var(--color-obsidian);
+  scrollbar-color: rgba(138, 101, 62, 0.45) var(--color-obsidian);
 }
 
 html::-webkit-scrollbar {

@@ -1,7 +1,25 @@
 import type { Metadata } from "next";
+import localFont from "next/font/local";
 import { Plus_Jakarta_Sans, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import Header from "@/components/Header";
+
+const editorial = localFont({
+  variable: "--font-serif",
+  display: "swap",
+  src: [
+    {
+      path: "../../public/font/PP Editorial New Ultralight.woff2",
+      weight: "200",
+      style: "normal",
+    },
+    {
+      path: "../../public/font/PP Editorial New.woff2",
+      weight: "400",
+      style: "normal",
+    },
+  ],
+});
 
 const jakarta = Plus_Jakarta_Sans({
   variable: "--font-sans",
@@ -23,32 +41,19 @@ export const metadata: Metadata = {
 };
 
 export default function RootLayout({
-                                     children,
-                                   }: Readonly<{
+  children,
+}: Readonly<{
   children: React.ReactNode;
 }>) {
   return (
-      <html lang="en" className={`${jakarta.variable} ${geistMono.variable}`}>
-      <head>
-        <link
-            rel="preload"
-            href="/font/PP%20Editorial%20New%20Ultralight.woff2"
-            as="font"
-            type="font/woff2"
-            crossOrigin="anonymous"
-        />
-        <link
-            rel="preload"
-            href="/font/PP%20Editorial%20New.woff2"
-            as="font"
-            type="font/woff2"
-            crossOrigin="anonymous"
-        />
-      </head>
+    <html
+      lang="en"
+      className={`${editorial.variable} ${jakarta.variable} ${geistMono.variable}`}
+    >
       <body>
         <Header />
         {children}
       </body>
-      </html>
+    </html>
   );
 }

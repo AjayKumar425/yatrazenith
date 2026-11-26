@@ -142,12 +142,12 @@ export default function Preloader({
 
                 if (titleSplit.masks.length > 0) {
                     gsap.set(titleSplit.masks, {
-                        paddingTop: "0.14em",
-                        paddingBottom: "0.18em",
-                        marginTop: "-0.14em",
-                        marginBottom: "-0.18em",
-                        paddingInline: "0.08em",
-                        marginInline: "-0.08em",
+                        paddingTop: "0.2em",
+                        paddingBottom: "0.26em",
+                        marginTop: "-0.2em",
+                        marginBottom: "-0.26em",
+                        paddingInline: "0.14em",
+                        marginInline: "-0.14em",
                     });
                 }
 

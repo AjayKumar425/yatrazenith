@@ -26,14 +26,17 @@ gsap.registerPlugin(useGSAP);
 export default function MenuCatalog() {
   const router = useRouter();
   const [activeCategory, setActiveCategory] = useState<"All" | MenuCategory>("All");
-  const [activeRegion, setActiveRegion] = useState<(typeof MENU_REGIONS)[number]>("All Regions");
+  const [activeRegion, setActiveRegion] =
+    useState<(typeof MENU_REGIONS)[number]>("All Regions");
+  const [hasFiltered, setHasFiltered] = useState(false);
+
   const itinerary = useSyncExternalStore(
     subscribeItinerary,
     readItinerary,
     getServerItinerary
   );
   const selectedItems = itinerary.menuItems;
-  const gridRef = useRef<HTMLDivElement>(null);
+  const catalogRef = useRef<HTMLDivElement>(null);
 
   const filteredItems = useMemo(() => {
     return MENU_ITEMS.filter((item) => {
@@ -58,8 +61,9 @@ export default function MenuCatalog() {
           );
 
     return catsToRender
-      .map((cat) => ({
+      .map((cat, idx) => ({
         ...cat,
+        sectionNum: String(idx + 1).padStart(2, "0"),
         items: filteredItems.filter((item) => item.category === cat.id),
       }))
       .filter((group) => group.items.length > 0);
@@ -67,8 +71,8 @@ export default function MenuCatalog() {
 
   useGSAP(
     () => {
-      const grid = gridRef.current;
-      if (!grid) return;
+      const container = catalogRef.current;
+      if (!container) return;
 
       const prefersReducedMotion = window.matchMedia(
         "(prefers-reduced-motion: reduce)"
@@ -76,22 +80,23 @@ export default function MenuCatalog() {
 
       if (prefersReducedMotion) return;
 
-      const cards = grid.querySelectorAll("[data-menu-card]");
-      if (cards.length === 0) return;
+      const rows = container.querySelectorAll("[data-index-row]");
+      if (rows.length === 0) return;
 
       gsap.fromTo(
-        cards,
-        { y: 20, autoAlpha: 0 },
+        rows,
+        { y: 18, autoAlpha: 0 },
         {
           y: 0,
           autoAlpha: 1,
-          duration: 0.7,
-          stagger: 0.045,
+          duration: 0.72,
+          stagger: 0.035,
           ease: "expo.out",
+          clearProps: "transform",
         }
       );
     },
-    { scope: gridRef, dependencies: [activeCategory, activeRegion] }
+    { scope: catalogRef, dependencies: [activeCategory, activeRegion] }
   );
 
   const isSelected = (id: string) =>
@@ -141,9 +146,7 @@ export default function MenuCatalog() {
       sanctuaryTitle: firstSanctuary
         ? firstSanctuary.title
         : current.sanctuaryTitle,
-      nightlyRate: firstSanctuary
-        ? firstSanctuary.price
-        : current.nightlyRate,
+      nightlyRate: firstSanctuary ? firstSanctuary.price : current.nightlyRate,
       menuItems: selectedItems,
     });
 
@@ -161,10 +164,10 @@ export default function MenuCatalog() {
         <div className={styles.container}>
           <div className={styles.heroMeta}>
             <MaskReveal immediate className={styles.eyebrow}>
-              Curated Archive · 2026–27 Season
+              Curated Index · 2026–27 Season
             </MaskReveal>
             <MaskReveal immediate delay={0.08} className={styles.heroStats}>
-              12 Offerings · 3 Himalayan Valleys
+              12 Offerings · Garhwal · Ladakh · Spiti
             </MaskReveal>
           </div>
 
@@ -175,10 +178,10 @@ export default function MenuCatalog() {
           </h1>
 
           <div className={styles.heroLeadWrap}>
-            <MaskReveal immediate delay={0.2} className={styles.lead}>
-              Select architectural estates, naturalist expeditions, thermal
-              recovery sessions, and private mountain dining to compose a
-              bespoke Himalayan brief.
+            <MaskReveal immediate delay={0.18} className={styles.lead}>
+              An architectural ledger of private mountain sanctuaries,
+              naturalist-led passages, thermal soaks, and hearth dining. Select
+              individual experiences to compose your brief.
             </MaskReveal>
           </div>
         </div>
@@ -206,10 +209,15 @@ export default function MenuCatalog() {
                     role="tab"
                     aria-selected={active}
                     className={`${styles.catBtn} ${active ? styles.catBtnActive : ""}`}
-                    onClick={() => setActiveCategory(cat.id)}
+                    onClick={() => {
+                      setHasFiltered(true);
+                      setActiveCategory(cat.id);
+                    }}
                   >
                     <span>{cat.label}</span>
-                    <span className={styles.catCount}>{count}</span>
+                    <sup className={styles.catCount}>
+                      {String(count).padStart(2, "0")}
+                    </sup>
                   </button>
                 );
               })}
@@ -220,11 +228,12 @@ export default function MenuCatalog() {
                 <span className={styles.srOnly}>Filter by region</span>
                 <select
                   value={activeRegion}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    setHasFiltered(true);
                     setActiveRegion(
                       e.target.value as (typeof MENU_REGIONS)[number]
-                    )
-                  }
+                    );
+                  }}
                   className={styles.regionSelect}
                 >
                   {MENU_REGIONS.map((region) => (
@@ -236,7 +245,8 @@ export default function MenuCatalog() {
               </label>
 
               <span className={styles.resultCount}>
-                Showing {filteredItems.length} of {MENU_ITEMS.length}
+                {String(filteredItems.length).padStart(2, "0")} /{" "}
+                {MENU_ITEMS.length}
               </span>
             </div>
           </div>
@@ -244,7 +254,7 @@ export default function MenuCatalog() {
       </section>
 
       <section className={styles.catalogSection}>
-        <div ref={gridRef} className={styles.container}>
+        <div ref={catalogRef} className={styles.container}>
           {groupedSections.length === 0 ? (
             <div className={styles.emptyState}>
               <p>No offerings match the selected category and region.</p>
@@ -252,6 +262,7 @@ export default function MenuCatalog() {
                 type="button"
                 className={styles.resetBtn}
                 onClick={() => {
+                  setHasFiltered(true);
                   setActiveCategory("All");
                   setActiveRegion("All Regions");
                 }}
@@ -264,79 +275,92 @@ export default function MenuCatalog() {
               {groupedSections.map((group) => (
                 <div key={group.id} className={styles.categoryGroup}>
                   <div className={styles.groupHeader}>
-                    <div>
-                      <MaskReveal className={styles.groupEyebrow}>
-                        {group.label} ({String(group.items.length).padStart(2, "0")})
+                    <div className={styles.groupHeadingWrap}>
+                      <MaskReveal
+                        immediate={hasFiltered}
+                        className={styles.groupEyebrow}
+                      >
+                        {group.sectionNum} / {group.label}
                       </MaskReveal>
                       <h2 className={styles.groupTitle}>
-                        <MaskReveal delay={0.06}>{group.subtitle}</MaskReveal>
+                        <MaskReveal immediate={hasFiltered} delay={0.06}>
+                          {group.subtitle}
+                        </MaskReveal>
                       </h2>
+                    </div>
+
+                    <div className={styles.groupMetaLabels} aria-hidden="true">
+                      <span>Altitude &amp; Duration</span>
+                      <span>Tariff</span>
                     </div>
                   </div>
 
-                  <div className={styles.cardsGrid}>
+                  <div className={styles.indexList}>
                     {group.items.map((item) => {
                       const added = isSelected(item.id);
                       return (
                         <article
                           key={item.id}
-                          className={`${styles.card} ${added ? styles.cardSelected : ""}`}
-                          data-menu-card
+                          className={`${styles.indexRow} ${added ? styles.indexRowSelected : ""}`}
+                          data-index-row
                         >
-                          <div className={styles.cardMedia}>
+                          <div className={styles.rowCode}>
+                            <span>{item.code}</span>
+                          </div>
+
+                          <div className={styles.rowThumb}>
                             <Image
                               src={item.imageSrc}
                               alt={item.imageAlt}
                               fill
-                              sizes="(max-width: 720px) 100vw, (max-width: 1120px) 50vw, 33vw"
-                              className={styles.cardImg}
+                              sizes="(max-width: 860px) 100vw, 140px"
+                              className={styles.rowImg}
                             />
-                            <span className={styles.mediaBadge}>
-                              {item.region.split(" & ")[0]} · {item.elevation}
+                          </div>
+
+                          <div className={styles.rowMain}>
+                            <div className={styles.rowMicro}>
+                              <span>{item.region}</span>
+                              <span>·</span>
+                              <span>{item.highlights[0]}</span>
+                              <span>·</span>
+                              <span>{item.highlights[1]}</span>
+                            </div>
+                            <h3 className={styles.rowTitle}>{item.title}</h3>
+                            <p className={styles.rowDesc}>{item.description}</p>
+                          </div>
+
+                          <div className={styles.rowSpecs}>
+                            <span className={styles.rowElevation}>
+                              {item.elevation}
+                            </span>
+                            <span className={styles.rowDuration}>
+                              {item.duration}
                             </span>
                           </div>
 
-                          <div className={styles.cardBody}>
-                            <div className={styles.cardTop}>
-                              <div className={styles.cardMeta}>
-                                <span>
-                                  {item.code} · {item.category}
-                                </span>
-                                <span>{item.duration}</span>
-                              </div>
-
-                              <h3 className={styles.cardTitle}>{item.title}</h3>
-                              <p className={styles.cardDesc}>
-                                {item.description}
-                              </p>
-
-                              <div className={styles.highlights}>
-                                {item.highlights.map((tag) => (
-                                  <span key={tag} className={styles.tag}>
-                                    {tag}
-                                  </span>
-                                ))}
-                              </div>
+                          <div className={styles.rowAction}>
+                            <div className={styles.priceWrap}>
+                              <strong className={styles.price}>
+                                ${item.price}
+                              </strong>
+                              <span className={styles.unit}>
+                                {item.unitLabel}
+                              </span>
                             </div>
 
-                            <div className={styles.cardFooter}>
-                              <div className={styles.priceWrap}>
-                                <strong className={styles.price}>
-                                  ${item.price}
-                                </strong>
-                                <span className={styles.unit}>
-                                  {item.unitLabel}
-                                </span>
-                              </div>
-
+                            <div className={styles.actionControls}>
                               <button
                                 type="button"
                                 className={`${styles.selectBtn} ${added ? styles.selectBtnActive : ""}`}
                                 onClick={() => toggleItem(item)}
                                 aria-pressed={added}
                               >
-                                {added ? "✓ Selected" : "+ Add to Brief"}
+                                {added ? "✓ Selected" : "+ Select"}
                               </button>
+                              <span className={styles.rowCue} aria-hidden="true">
+                                →
+                              </span>
                             </div>
                           </div>
                         </article>

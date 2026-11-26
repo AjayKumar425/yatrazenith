@@ -2,19 +2,19 @@
 
 import { useRef, useState } from "react";
 import Image from "next/image";
+import Link from "next/link";
 import gsap from "gsap";
 import { useGSAP } from "@gsap/react";
-import { SplitText } from "gsap/SplitText";
-import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { Draggable } from "gsap/Draggable";
 import { InertiaPlugin } from "gsap/InertiaPlugin";
 import Rounded from "@/ui/Rounded";
+import MaskReveal from "@/ui/MaskReveal";
 import { readItinerary, writeItinerary } from "@/lib/itinerary";
 import { SANCTUARIES } from "./data";
 import { SanctuaryIcon } from "./icons";
 import styles from "./style.module.scss";
 
-gsap.registerPlugin(useGSAP, SplitText, ScrollTrigger, Draggable, InertiaPlugin);
+gsap.registerPlugin(useGSAP, Draggable, InertiaPlugin);
 
 export interface SanctuarySelectionDetail {
   region: string;
@@ -25,14 +25,12 @@ export interface SanctuarySelectionDetail {
 
 export default function Sanctuaries() {
   const [activeIndex, setActiveIndex] = useState(0);
+  const [hasSwitchedTab, setHasSwitchedTab] = useState(false);
   const [canPrev, setCanPrev] = useState(false);
   const [canNext, setCanNext] = useState(true);
 
   const sectionRef = useRef<HTMLElement>(null);
   const sheetRef = useRef<HTMLDivElement>(null);
-  const headerRef = useRef<HTMLDivElement>(null);
-  const titleRef = useRef<HTMLHeadingElement>(null);
-  const subtitleRef = useRef<HTMLDivElement>(null);
   const trackViewportRef = useRef<HTMLDivElement>(null);
   const trackRef = useRef<HTMLDivElement>(null);
   const progressFillRef = useRef<HTMLDivElement>(null);
@@ -43,7 +41,6 @@ export default function Sanctuaries() {
     minX: -480,
     baseProgress: 0.28,
   });
-  const hasInteractedTabRef = useRef(false);
 
   const activeSanctuary = SANCTUARIES[activeIndex];
 
@@ -68,43 +65,6 @@ export default function Sanctuaries() {
     setCanNext(minX < -4 && currentX > minX + 4);
   };
 
-  // Crisp editorial sheet entrance on scroll
-  useGSAP(
-    () => {
-      const section = sectionRef.current;
-      if (!section) return;
-
-      const prefersReducedMotion = window.matchMedia(
-        "(prefers-reduced-motion: reduce)"
-      ).matches;
-
-      if (prefersReducedMotion) {
-        gsap.set(sheetRef.current, { autoAlpha: 1, y: 0 });
-        return;
-      }
-
-      if (sheetRef.current) {
-        gsap.fromTo(
-          sheetRef.current,
-          { y: 36, autoAlpha: 0.94 },
-          {
-            y: 0,
-            autoAlpha: 1,
-            duration: 1.05,
-            ease: "expo.out",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 86%",
-              once: true,
-            },
-          }
-        );
-      }
-    },
-    { scope: sectionRef }
-  );
-
-  // SplitText header reveal + Draggable horizontal card track per selected sanctuary
   useGSAP(
     () => {
       const sheet = sheetRef.current;
@@ -158,7 +118,7 @@ export default function Sanctuaries() {
 
       draggableRef.current = instances[0] ?? null;
 
-      const observer = new ResizeObserver(() => {
+      const resizeObserver = new ResizeObserver(() => {
         const updated = computeBounds();
         const currentDraggable = draggableRef.current;
         if (currentDraggable) {
@@ -172,147 +132,85 @@ export default function Sanctuaries() {
           syncTrackState(clampedX);
         }
       });
-      observer.observe(viewport);
+      resizeObserver.observe(viewport);
 
-      let isCancelled = false;
-      let fontCtx: gsap.Context | null = null;
-      let titleSplit: SplitText | null = null;
+      let deckObserver: IntersectionObserver | null = null;
+      let deckTl: gsap.core.Timeline | null = null;
 
       if (!prefersReducedMotion) {
-        const isImmediateSwitch = hasInteractedTabRef.current;
         const cards = track.querySelectorAll("[data-sanctuary-card]");
         const rules = track.querySelectorAll("[data-spec-rule]");
 
-        const deckTl = gsap.timeline(
-          isImmediateSwitch
-            ? undefined
-            : {
-                scrollTrigger: {
-                  trigger: viewport,
-                  start: "top 86%",
-                  once: true,
-                },
-              }
-        );
-
-        deckTl
-          .fromTo(
-            cards,
-            { y: 26, autoAlpha: 0 },
-            {
-              y: 0,
-              autoAlpha: 1,
-              duration: 0.9,
-              stagger: 0.07,
-              ease: "expo.out",
-            },
-            0
-          )
-          .fromTo(
-            rules,
-            { scaleX: 0 },
-            {
-              scaleX: 1,
-              duration: 0.85,
-              stagger: 0.025,
-              ease: "expo.inOut",
-            },
-            0.12
-          );
-
-        document.fonts.ready.then(() => {
-          if (isCancelled || !titleRef.current || !headerRef.current) return;
-
-          fontCtx = gsap.context(() => {
-            titleSplit = SplitText.create(titleRef.current!, {
-              type: "lines",
-              mask: "lines",
-              linesClass: styles.splitLine,
-            });
-
-            if (titleSplit.masks.length > 0) {
-              gsap.set(titleSplit.masks, {
-                paddingTop: "0.18em",
-                paddingBottom: "0.22em",
-                marginTop: "-0.18em",
-                marginBottom: "-0.22em",
-                paddingInline: "0.12em",
-                marginInline: "-0.12em",
-              });
-            }
-
-            const headerTl = gsap.timeline({
-              ...(isImmediateSwitch
-                ? {}
-                : {
-                    scrollTrigger: {
-                      trigger: headerRef.current,
-                      start: "top 84%",
-                      once: true,
-                    },
-                  }),
-              onComplete: () => {
-                titleSplit?.revert();
+        const animateDeck = () => {
+          deckTl?.kill();
+          deckTl = gsap
+            .timeline()
+            .fromTo(
+              cards,
+              { y: 24, autoAlpha: 0 },
+              {
+                y: 0,
+                autoAlpha: 1,
+                duration: 0.85,
+                stagger: 0.065,
+                ease: "expo.out",
+                clearProps: "transform",
               },
-            });
+              0
+            )
+            .fromTo(
+              rules,
+              { scaleX: 0 },
+              {
+                scaleX: 1,
+                duration: 0.8,
+                stagger: 0.02,
+                ease: "expo.inOut",
+              },
+              0.1
+            );
+        };
 
-            if (!isImmediateSwitch) {
-              headerTl.fromTo(
-                "[data-sanctuary-eyebrow]",
-                { y: 12, autoAlpha: 0 },
-                { y: 0, autoAlpha: 1, duration: 0.75, ease: "expo.out" },
-                0
-              );
-            }
-
-            headerTl
-              .fromTo(
-                titleSplit.lines,
-                { yPercent: 115 },
-                {
-                  yPercent: 0,
-                  duration: isImmediateSwitch ? 0.85 : 1.15,
-                  stagger: 0.09,
-                  ease: "expo.out",
-                },
-                isImmediateSwitch ? 0 : 0.08
-              )
-              .fromTo(
-                subtitleRef.current?.querySelectorAll("p") ?? [],
-                { y: 14, autoAlpha: 0 },
-                {
-                  y: 0,
-                  autoAlpha: 1,
-                  duration: 0.8,
-                  stagger: 0.07,
-                  ease: "expo.out",
-                },
-                isImmediateSwitch ? 0.1 : 0.24
-              );
-          }, sheet);
-
-          if (!isImmediateSwitch) {
-            ScrollTrigger.refresh();
-          }
-        });
+        const rect = viewport.getBoundingClientRect();
+        if (hasSwitchedTab || rect.top <= window.innerHeight * 0.94) {
+          animateDeck();
+        } else {
+          gsap.set(cards, { y: 24, autoAlpha: 0 });
+          gsap.set(rules, { scaleX: 0 });
+          deckObserver = new IntersectionObserver(
+            (entries) => {
+              for (const entry of entries) {
+                if (
+                  entry.isIntersecting ||
+                  entry.boundingClientRect.top <= window.innerHeight
+                ) {
+                  animateDeck();
+                  deckObserver?.disconnect();
+                  break;
+                }
+              }
+            },
+            { threshold: 0.01, rootMargin: "0px 0px -24px 0px" }
+          );
+          deckObserver.observe(viewport);
+        }
       }
 
       return () => {
-        isCancelled = true;
-        observer.disconnect();
+        resizeObserver.disconnect();
+        deckObserver?.disconnect();
+        deckTl?.kill();
         slideTweenRef.current?.kill();
         draggableRef.current?.kill();
         draggableRef.current = null;
-        titleSplit?.revert();
-        fontCtx?.revert();
       };
     },
-    { scope: sheetRef, dependencies: [activeIndex] }
+    { scope: sheetRef, dependencies: [activeIndex, hasSwitchedTab] }
   );
 
   const handleSelectSanctuary = (index: number) => {
     if (index === activeIndex) return;
-    hasInteractedTabRef.current = true;
+    setHasSwitchedTab(true);
     setActiveIndex(index);
   };
 
@@ -376,28 +274,31 @@ export default function Sanctuaries() {
       aria-labelledby="sanctuary-heading"
     >
       <div ref={sheetRef} className={styles.sheet}>
-        <div ref={headerRef} className={styles.header}>
-          <span className={styles.eyebrow} data-sanctuary-eyebrow>
+        <div key={activeSanctuary.id} className={styles.header}>
+          <MaskReveal immediate={hasSwitchedTab} className={styles.eyebrow}>
             {activeSanctuary.eyebrow}
-          </span>
+          </MaskReveal>
 
-          <h2
-            key={activeSanctuary.id}
-            ref={titleRef}
-            id="sanctuary-heading"
-            className={styles.title}
-          >
-            <span className={styles.titleLine}>
-              {activeSanctuary.titleLines[0]}
-            </span>
-            <span className={styles.titleLine}>
-              {activeSanctuary.titleLines[1]}
-            </span>
+          <h2 id="sanctuary-heading" className={styles.title}>
+            <MaskReveal immediate={hasSwitchedTab} delay={0.05}>
+              <span className={styles.titleLine}>
+                {activeSanctuary.titleLines[0]}
+              </span>
+            </MaskReveal>
+            <MaskReveal immediate={hasSwitchedTab} delay={0.14}>
+              <span className={styles.titleLine}>
+                {activeSanctuary.titleLines[1]}
+              </span>
+            </MaskReveal>
           </h2>
 
-          <div ref={subtitleRef} className={styles.subtitle}>
-            <p>{activeSanctuary.description[0]}</p>
-            <p>{activeSanctuary.description[1]}</p>
+          <div className={styles.subtitle}>
+            <MaskReveal immediate={hasSwitchedTab} delay={0.18}>
+              <p>{activeSanctuary.description[0]}</p>
+            </MaskReveal>
+            <MaskReveal immediate={hasSwitchedTab} delay={0.24}>
+              <p>{activeSanctuary.description[1]}</p>
+            </MaskReveal>
           </div>
         </div>
 
@@ -533,12 +434,16 @@ export default function Sanctuaries() {
           </div>
 
           <div className={styles.bookingActions}>
+            <Link href="/menu" className={styles.menuLink}>
+              Full Menu →
+            </Link>
+
             <div className={styles.rate}>
               <strong>${activeSanctuary.nightlyRate}</strong>
               <span>Per Night · Private Buyout</span>
             </div>
 
-            <Rounded className={styles.reserveBtn} backgroundColor="#141414">
+            <Rounded className={styles.reserveBtn} backgroundColor="#141413">
               <button
                 type="button"
                 className={styles.reserveInner}

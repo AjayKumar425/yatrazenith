@@ -53,39 +53,58 @@ export default function Description({
       let fontCtx: gsap.Context | null = null;
       let manifestoSplit: SplitText | null = null;
       let bodySplit: SplitText | null = null;
+      const observers: IntersectionObserver[] = [];
+
+      const observeOnce = (
+        el: Element | null,
+        callback: () => void,
+        margin = "0px 0px -32px 0px"
+      ) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        if (rect.top <= window.innerHeight * 0.95) {
+          callback();
+          return;
+        }
+        const obs = new IntersectionObserver(
+          (entries) => {
+            for (const entry of entries) {
+              if (
+                entry.isIntersecting ||
+                entry.boundingClientRect.top <= window.innerHeight
+              ) {
+                callback();
+                obs.disconnect();
+                break;
+              }
+            }
+          },
+          { threshold: 0.01, rootMargin: margin }
+        );
+        obs.observe(el);
+        observers.push(obs);
+      };
 
       if (topRuleRef.current) {
-        gsap.fromTo(
-          topRuleRef.current,
-          { scaleX: 0 },
-          {
+        gsap.set(topRuleRef.current, { scaleX: 0 });
+        observeOnce(topRuleRef.current, () => {
+          gsap.to(topRuleRef.current, {
             scaleX: 1,
             duration: 1.0,
             ease: "expo.inOut",
-            scrollTrigger: {
-              trigger: section,
-              start: "top 84%",
-              once: true,
-            },
-          }
-        );
+          });
+        });
       }
 
       if (frameRef.current && imageWrapRef.current) {
-        gsap.fromTo(
-          frameRef.current,
-          { clipPath: "inset(14% 0% 0% 0%)" },
-          {
+        gsap.set(frameRef.current, { clipPath: "inset(12% 0% 0% 0%)" });
+        observeOnce(frameRef.current, () => {
+          gsap.to(frameRef.current, {
             clipPath: "inset(0% 0% 0% 0%)",
-            duration: 1.3,
+            duration: 1.25,
             ease: "expo.out",
-            scrollTrigger: {
-              trigger: frameRef.current,
-              start: "top 85%",
-              once: true,
-            },
-          }
-        );
+          });
+        });
 
         gsap.fromTo(
           imageWrapRef.current,
@@ -99,27 +118,22 @@ export default function Description({
               start: "top bottom",
               end: "bottom top",
               scrub: true,
+              invalidateOnRefresh: true,
             },
           }
         );
       }
 
       if (ctaRef.current) {
-        gsap.fromTo(
-          ctaRef.current,
-          { y: 18, autoAlpha: 0 },
-          {
+        gsap.set(ctaRef.current, { y: 18, autoAlpha: 0 });
+        observeOnce(ctaRef.current, () => {
+          gsap.to(ctaRef.current, {
             y: 0,
             autoAlpha: 1,
             duration: 0.9,
             ease: "expo.out",
-            scrollTrigger: {
-              trigger: ctaRef.current,
-              start: "top 88%",
-              once: true,
-            },
-          }
-        );
+          });
+        });
       }
 
       document.fonts.ready.then(() => {
@@ -134,16 +148,17 @@ export default function Description({
 
           gsap.fromTo(
             manifestoSplit.words,
-            { opacity: 0.16 },
+            { opacity: 0.2 },
             {
               opacity: 1,
               stagger: 0.04,
               ease: "none",
               scrollTrigger: {
                 trigger: manifestoRef.current,
-                start: "top 82%",
-                end: "bottom 52%",
-                scrub: 0.5,
+                start: "top 86%",
+                end: "bottom 54%",
+                scrub: 0.4,
+                invalidateOnRefresh: true,
               },
             }
           );
@@ -157,33 +172,28 @@ export default function Description({
 
           if (bodySplit.masks.length > 0) {
             gsap.set(bodySplit.masks, {
-              paddingTop: "0.14em",
-              paddingBottom: "0.18em",
-              marginTop: "-0.14em",
-              marginBottom: "-0.18em",
-              paddingInline: "0.06em",
-              marginInline: "-0.06em",
+              paddingTop: "0.18em",
+              paddingBottom: "0.26em",
+              marginTop: "-0.18em",
+              marginBottom: "-0.26em",
+              paddingInline: "0.08em",
+              marginInline: "-0.08em",
             });
           }
 
-          gsap.fromTo(
-            bodySplit.lines,
-            { yPercent: 110 },
-            {
+          gsap.set(bodySplit.lines, { yPercent: 110 });
+          observeOnce(copyWrapRef.current, () => {
+            if (!bodySplit) return;
+            gsap.to(bodySplit.lines, {
               yPercent: 0,
               duration: 1.05,
-              stagger: 0.055,
+              stagger: 0.06,
               ease: "expo.out",
               onComplete: () => {
                 bodySplit?.revert();
               },
-              scrollTrigger: {
-                trigger: copyWrapRef.current,
-                start: "top 84%",
-                once: true,
-              },
-            }
-          );
+            });
+          });
         }, section);
 
         ScrollTrigger.refresh();
@@ -191,6 +201,7 @@ export default function Description({
 
       return () => {
         isCancelled = true;
+        observers.forEach((obs) => obs.disconnect());
         manifestoSplit?.revert();
         bodySplit?.revert();
         fontCtx?.revert();
@@ -275,7 +286,7 @@ export default function Description({
             </div>
 
             <div ref={ctaRef} className={styles.ctaWrap}>
-              <Rounded className={styles.ctaBtn} backgroundColor="#141414">
+              <Rounded className={styles.ctaBtn} backgroundColor="#141413">
                 <Link href={ctaHref} className={styles.ctaLink}>
                   <span>{ctaLabel}</span>
                   <span className={styles.arrow} aria-hidden="true">

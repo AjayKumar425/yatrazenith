@@ -89,8 +89,8 @@
   font-family: var(--font-serif-family);
   font-size: clamp(3rem, 7.8vw, 6.85rem);
   font-weight: 200;
-  letter-spacing: -0.015em;
-  line-height: 1.05;
+  letter-spacing: -0.03em;
+  line-height: 1.06;
   max-width: 14ch;
   margin-bottom: clamp(1.75rem, 4vh, 2.85rem);
   text-shadow: 0 8px 36px rgba(0, 0, 0, 0.28);
@@ -99,7 +99,7 @@
     font-style: italic;
     font-weight: 200;
     color: #efebe4;
-    padding-right: 0.08em;
+    padding-right: 0.1em;
   }
 }
 

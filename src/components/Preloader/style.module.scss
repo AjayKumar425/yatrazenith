@@ -8,8 +8,8 @@
 .veil {
   position: absolute;
   inset: 0;
-  background-color: #f3f3f1;
-  border-bottom: 1px solid rgba(20, 20, 20, 0.12);
+  background-color: var(--color-surface-muted, #eceae4);
+  border-bottom: 1px solid var(--color-border, rgba(20, 20, 19, 0.12));
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
 }
@@ -17,8 +17,8 @@
 .panel {
   position: absolute;
   inset: 0;
-  background-color: #ffffff;
-  color: #141414;
+  background-color: var(--color-canvas, #f6f5f1);
+  color: var(--color-ink, #141413);
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
   overflow: hidden;

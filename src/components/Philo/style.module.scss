@@ -1,11 +1,11 @@
 .philo {
   position: relative;
   width: 100%;
-  background-color: var(--color-canvas, #ffffff);
-  color: var(--color-ink, #141414);
-  border-top: 1px solid var(--color-border, rgba(20, 20, 20, 0.1));
-  border-bottom: 1px solid var(--color-border, rgba(20, 20, 20, 0.1));
-  padding: clamp(4rem, 7.5vw, 6.5rem) var(--gutter, clamp(1.25rem, 4vw, 3.5rem));
+  background-color: var(--color-surface-muted, #eceae4);
+  color: var(--color-ink, #141413);
+  border-top: 1px solid var(--color-border, rgba(20, 20, 19, 0.12));
+  border-bottom: 1px solid var(--color-border, rgba(20, 20, 19, 0.12));
+  padding: clamp(4.25rem, 7.5vw, 6.75rem) var(--gutter, clamp(1.25rem, 4.5vw, 4rem));
 }
 
 .container {

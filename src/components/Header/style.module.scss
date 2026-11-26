@@ -30,17 +30,17 @@
 }
 
 .lightBar {
-  background-color: rgba(255, 255, 255, 0.94);
+  background-color: rgba(246, 245, 241, 0.92);
   backdrop-filter: blur(14px);
-  color: var(--color-ink, #141414);
-  border-bottom-color: var(--color-border, rgba(20, 20, 20, 0.1));
+  color: var(--color-ink, #141413);
+  border-bottom-color: var(--color-border, rgba(20, 20, 19, 0.12));
 }
 
 .scrolled {
-  background-color: rgba(255, 255, 255, 0.96);
+  background-color: rgba(246, 245, 241, 0.95);
   backdrop-filter: blur(16px);
-  color: var(--color-ink, #141414);
-  border-bottom-color: var(--color-border, rgba(20, 20, 20, 0.1));
+  color: var(--color-ink, #141413);
+  border-bottom-color: var(--color-border, rgba(20, 20, 19, 0.12));
 }
 
 .menuOpen {

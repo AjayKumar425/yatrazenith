@@ -145,12 +145,14 @@ export default function Landing() {
         const masks = [...titleSplit.masks, ...leadSplit.masks];
         if (masks.length > 0) {
           gsap.set(masks, {
-            paddingTop: "0.16em",
-            paddingBottom: "0.2em",
-            marginTop: "-0.16em",
-            marginBottom: "-0.2em",
-            paddingInline: "0.08em",
-            marginInline: "-0.08em",
+            paddingTop: "0.2em",
+            paddingBottom: "0.28em",
+            marginTop: "-0.2em",
+            marginBottom: "-0.28em",
+            paddingLeft: "0.08em",
+            paddingRight: "0.22em",
+            marginLeft: "-0.08em",
+            marginRight: "-0.22em",
           });
         }
 
@@ -241,7 +243,11 @@ export default function Landing() {
       };
 
       const triggerWhenFontsReady = () => {
-        document.fonts.ready.then(playReveal);
+        const safety = window.setTimeout(playReveal, 600);
+        document.fonts.ready.then(() => {
+          window.clearTimeout(safety);
+          playReveal();
+        });
       };
 
       let fallbackTimer: number | undefined;

@@ -1,10 +1,8 @@
 .mask {
   display: block;
   overflow: hidden;
-  padding-block: 0.14em;
-  margin-block: -0.14em;
-  padding-inline: 0.06em;
-  margin-inline: -0.06em;
+  padding: 0.18em 0.16em 0.28em 0.06em;
+  margin: -0.18em -0.16em -0.28em -0.06em;
 }
 
 .inlineMask {
