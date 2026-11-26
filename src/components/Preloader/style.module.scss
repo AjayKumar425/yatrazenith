@@ -8,8 +8,8 @@
 .veil {
   position: absolute;
   inset: 0;
-  background-color: #ebe7e0;
-  border-bottom: 1px solid rgba(20, 20, 20, 0.14);
+  background-color: #f3f3f1;
+  border-bottom: 1px solid rgba(20, 20, 20, 0.12);
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;
 }
@@ -17,12 +17,7 @@
 .panel {
   position: absolute;
   inset: 0;
-  background: radial-gradient(
-    ellipse 88% 76% at 50% 42%,
-    #ffffff 0%,
-    #f7f5f0 68%,
-    #f0ece4 100%
-  );
+  background-color: #ffffff;
   color: #141414;
   clip-path: inset(0% 0% 0% 0%);
   will-change: clip-path;

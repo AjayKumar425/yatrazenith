@@ -15,9 +15,9 @@
 }
 
 :root {
-  --color-canvas: #f8f8f6;
+  --color-canvas: #ffffff;
   --color-surface: #ffffff;
-  --color-surface-muted: #f1f1ee;
+  --color-surface-muted: #f4f4f1;
   --color-ink: #141414;
   --color-ink-secondary: #5c5c5c;
   --color-ink-muted: #767672;
@@ -25,11 +25,11 @@
   --color-obsidian: #111112;
   --color-dark: #141414;
   --color-dark-rgb: 20, 20, 20;
-  --color-light: #f8f8f6;
-  --color-light-rgb: 248, 248, 246;
-  --color-white: #f8f8f6;
-  --color-white-rgb: 248, 248, 246;
-  --color-sand: #f1f1ee;
+  --color-light: #ffffff;
+  --color-light-rgb: 255, 255, 255;
+  --color-white: #ffffff;
+  --color-white-rgb: 255, 255, 255;
+  --color-sand: #f4f4f1;
 
   --color-accent: #8f6a42;
   --color-accent-light: #c49a6c;

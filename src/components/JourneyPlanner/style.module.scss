@@ -220,7 +220,7 @@
 }
 
 .preview {
-  background: var(--color-surface, #ffffff);
+  background: var(--color-surface-muted, #f4f4f1);
   border: 1px solid var(--color-border, rgba(20, 20, 20, 0.1));
   padding: clamp(1.5rem, 3vw, 2.35rem);
   height: fit-content;
